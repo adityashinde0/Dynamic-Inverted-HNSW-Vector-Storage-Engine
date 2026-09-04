@@ -17,6 +17,20 @@
   <!-- Main Viewport Composition -->
   <div class="cinematic-shell">
 
+    <!-- Offline / Demo-Safe Banner (Visible when engine connection lost) -->
+    <div class="system-offline-banner hidden" id="offlineBanner">
+      <div class="offline-banner-content">
+        <div class="offline-info">
+          <span class="status-pulse-core" style="background-color:#ef4444;box-shadow:0 0 8px #ef4444;"></span>
+          <strong>ENGINE CONNECTION LOST</strong>
+          <span class="offline-hint">&bull; Telemetry stream disconnected. Static architecture and cached metadata remain navigable.</span>
+        </div>
+        <button class="nav-action-btn action-retry" id="bannerRetryBtn">
+          <span class="btn-glyph">⟳</span> RETRY CONNECTION
+        </button>
+      </div>
+    </div>
+
     <!-- 1. Ultra-Minimal Floating Navigation Bar -->
     <nav class="floating-nav">
       <div class="nav-brand">
@@ -34,9 +48,14 @@
       </div>
 
       <div class="nav-right">
-        <div class="system-status-pill" id="engineStatusChip">
-          <span class="status-pulse-core"></span>
-          <span class="status-text" id="engineStatusText">ENGINE ONLINE</span>
+        <!-- Dual Engine vs Telemetry Status (Truthful Separation) -->
+        <div class="system-status-pill" id="engineStatusChip" title="Physical Storage Engine Process Status">
+          <span class="status-pulse-core" id="enginePulseCore"></span>
+          <span class="status-text" id="engineStatusText">ENGINE: ONLINE</span>
+        </div>
+        <div class="telemetry-status-pill" id="telemetryStatusChip" title="Real-time WebSocket / HTTP Telemetry Stream">
+          <span class="status-dot dot-cyan" id="telemetryPulseDot">●</span>
+          <span class="status-text" id="telemetryStatusText">TELEMETRY: LIVE</span>
         </div>
         <button class="nav-action-btn action-inject" id="injectBatchBtn" title="Ingest 1,000 Vectors into WAL & MemTable">
           <span class="btn-glyph">⚡</span> INGEST 1K
@@ -93,22 +112,22 @@
         <div class="signal-card" id="sig-write">
           <div class="signal-header">
             <span class="signal-title">WRITE THROUGHPUT</span>
-            <span class="signal-tag tag-pass">SLA EXCEEDED</span>
+            <span class="source-tag source-loading" id="sigWriteTag">LOADING</span>
           </div>
           <div class="signal-target-row">
             <span class="signal-target-lbl">TARGET</span>
             <span class="signal-target-val">&gt; 50,000 vectors/s</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-cyan" id="writeRateDisplay">0</div>
-            <div class="signal-unit" id="writeRateUnit">LIVE VEC/S (IDLE)</div>
+            <div class="signal-main-num text-cyan" id="writeRateDisplay">&mdash;</div>
+            <div class="signal-unit" id="writeRateUnit">INITIALIZING</div>
           </div>
           <div class="signal-meter">
             <div class="meter-fill bar-cyan" id="writeProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
             <span class="signal-status-ok">BENCHMARK: 119,676 vec/s</span>
-            <span class="signal-detail" id="totalWritesDisplay">Total: 24,000</span>
+            <span class="signal-detail" id="totalWritesDisplay">Total: &mdash;</span>
           </div>
         </div>
 
@@ -118,22 +137,22 @@
         <div class="signal-card" id="sig-query">
           <div class="signal-header">
             <span class="signal-title">CONCURRENT SEARCH</span>
-            <span class="signal-tag tag-purple">LOCK-FREE</span>
+            <span class="source-tag source-loading" id="sigQueryTag">LOADING</span>
           </div>
           <div class="signal-target-row">
             <span class="signal-target-lbl">TARGET</span>
             <span class="signal-target-val">2,000 queries/s</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-purple" id="queryRateDisplay">0</div>
-            <div class="signal-unit" id="queryRateUnit">LIVE Q/S (IDLE)</div>
+            <div class="signal-main-num text-purple" id="queryRateDisplay">&mdash;</div>
+            <div class="signal-unit" id="queryRateUnit">INITIALIZING</div>
           </div>
           <div class="signal-meter">
             <div class="meter-fill bar-purple" id="queryProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
             <span class="signal-status-ok">BENCHMARK: 2,014 q/s</span>
-            <span class="signal-detail" id="totalQueriesDisplay">Total: 12</span>
+            <span class="signal-detail" id="totalQueriesDisplay">Total: &mdash;</span>
           </div>
         </div>
 
@@ -143,22 +162,22 @@
         <div class="signal-card" id="sig-p99">
           <div class="signal-header">
             <span class="signal-title">P99 SEARCH LATENCY</span>
-            <span class="signal-tag tag-emerald">SLA PASS</span>
+            <span class="source-tag source-loading" id="sigP99Tag">LOADING</span>
           </div>
           <div class="signal-target-row">
             <span class="signal-target-lbl">TARGET</span>
             <span class="signal-target-val">&lt; 15.0 ms</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-emerald" id="p99LatencyDisplay">4.12</div>
-            <div class="signal-unit" id="p99RateUnit">MEASURED MS (P99)</div>
+            <div class="signal-main-num text-emerald" id="p99LatencyDisplay">&mdash;</div>
+            <div class="signal-unit" id="p99RateUnit">INITIALIZING</div>
           </div>
           <div class="signal-meter">
-            <div class="meter-fill bar-emerald" id="latencyProgressBar" style="width: 28%;"></div>
+            <div class="meter-fill bar-emerald" id="latencyProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
             <span class="signal-status-ok">BENCHMARK: 10.59 ms</span>
-            <span class="signal-detail">P50: <strong id="p50LatencyDisplay">2.47ms</strong> &bull; P95: <strong id="p95LatencyDisplay">4.12ms</strong></span>
+            <span class="signal-detail">P50: <strong id="p50LatencyDisplay">&mdash;</strong> &bull; P95: <strong id="p95LatencyDisplay">&mdash;</strong></span>
           </div>
         </div>
 
@@ -168,22 +187,22 @@
         <div class="signal-card" id="sig-storage">
           <div class="signal-header">
             <span class="signal-title">ACTIVE MEMTABLE</span>
-            <span class="signal-tag tag-amber" id="memtableStateBadge">ACTIVE</span>
+            <span class="source-tag source-loading" id="sigMemtableTag">LOADING</span>
           </div>
           <div class="signal-target-row">
             <span class="signal-target-lbl">THRESHOLD</span>
             <span class="signal-target-val">5,000 vectors</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-amber" id="nodeMemtableCount">0 / 5,000</div>
-            <div class="signal-unit" id="memFillPct">0% CAPACITY</div>
+            <div class="signal-main-num text-amber" id="nodeMemtableCount">&mdash; / 5,000</div>
+            <div class="signal-unit" id="memFillPct">INITIALIZING</div>
           </div>
           <div class="signal-meter">
             <div class="meter-fill bar-amber" id="memFillProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
             <span class="signal-status-ok">Lock-free Reader</span>
-            <span class="signal-detail" id="nodeSegmentCount">6 Segments Published</span>
+            <span class="signal-detail" id="nodeSegmentCount">Segments: &mdash;</span>
           </div>
         </div>
 
@@ -193,7 +212,7 @@
         <div class="signal-card" id="sig-wal">
           <div class="signal-header">
             <span class="signal-title">WAL &amp; COMPRESSION</span>
-            <span class="signal-tag tag-cyan">100% RECOVERY</span>
+            <span class="source-tag source-configured" id="sigWalTag">CONFIGURED</span>
           </div>
           <div class="signal-target-row">
             <span class="signal-target-lbl">TARGET</span>
@@ -208,7 +227,7 @@
           </div>
           <div class="signal-footer">
             <span class="signal-status-ok">CRC32 Checksummed</span>
-            <span class="signal-detail" id="nodeWalSize">WAL: 6.4 MB</span>
+            <span class="signal-detail" id="nodeWalSize">WAL: &mdash;</span>
           </div>
         </div>
       </div>
@@ -425,8 +444,11 @@
         <!-- Search Results Grid -->
         <div class="results-table-section">
           <div class="results-header-bar">
-            <span class="results-title">RANKED NEAREST NEIGHBORS</span>
-            <span class="results-stat-tag" id="queryStatsSummary">Latency: -- &bull; Recall@10: --</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="results-title">RANKED NEAREST NEIGHBORS</span>
+              <span class="source-tag source-loading" id="searchSourceTag">AWAITING QUERY</span>
+            </div>
+            <span class="results-stat-tag" id="queryStatsSummary">Latency: &mdash; &bull; Recall@10: &mdash;</span>
           </div>
           <div class="table-scroll-wrap">
             <table class="cinematic-table" id="resultsTable">
@@ -454,7 +476,7 @@
       <div class="segments-card" id="segments-matrix">
         <div class="instrument-header">
           <div class="inst-title-wrap">
-            <span class="inst-pretitle">PERSISTENT STORAGE</span>
+            <span class="inst-pretitle">PERSISTENT STORAGE &bull; <span class="source-tag source-loading" id="segmentSourceTag">LOADING</span></span>
             <h3 class="inst-title">Immutable Segment Matrix</h3>
             <p class="inst-sub">Physical disk segments built via MemTable rotation</p>
           </div>
@@ -551,7 +573,7 @@
       <div class="benchmark-card">
         <div class="benchmark-card-header">
           <div>
-            <span class="card-eyebrow">OFFICIAL EVALUATION EVIDENCE</span>
+            <span class="card-eyebrow">OFFICIAL EVALUATION EVIDENCE &bull; <span class="source-tag source-measured">MEASURED &bull; BENCHMARK</span></span>
             <h3 class="card-title">Technical Benchmark Verification Center</h3>
             <p class="inst-sub">Verified empirical measurements evaluated on reference dataset</p>
           </div>
@@ -625,7 +647,7 @@
       <div class="benchmark-card">
         <div class="benchmark-card-header">
           <div>
-            <span class="card-eyebrow">DURABILITY &amp; FAULT TOLERANCE // INV-10</span>
+            <span class="card-eyebrow">DURABILITY &amp; FAULT TOLERANCE // INV-10 &bull; <span class="source-tag source-configured">REPRESENTATIVE PROTOCOL SIMULATION</span></span>
             <h3 class="card-title">Engine Crash Recovery Visualizer</h3>
             <p class="inst-sub">Simulate an abrupt storage engine crash and observe the automatic WAL CRC32 replay sequence</p>
           </div>
@@ -688,9 +710,9 @@
     <div class="cinematic-modal-card hnsw-modal-card">
       <div class="modal-header">
         <div class="modal-title-group">
-          <span class="modal-eyebrow">GRAPH RETRIEVAL ACCELERATION // M=16, ef=100</span>
+          <span class="modal-eyebrow">GRAPH RETRIEVAL ACCELERATION // M=16, ef=100 &bull; <span class="source-tag source-configured">REPRESENTATIVE VIEW</span></span>
           <h2 class="modal-title">Representative HNSW Multi-Layer Traversal</h2>
-          <p class="modal-subtitle">Logarithmic greedy skip-list descent: Layer 2 express hops &rarr; Layer 1 regional routing &rarr; Layer 0 dense ground</p>
+          <p class="modal-subtitle">Live traversal telemetry unavailable &bull; Conceptual multi-layer skip-list descent: Layer 2 express hops &rarr; Layer 1 regional routing &rarr; Layer 0 dense ground</p>
         </div>
         <button class="modal-close-btn" id="hnswModalCloseBtn">&times;</button>
       </div>

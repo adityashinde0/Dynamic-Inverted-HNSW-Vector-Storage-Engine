@@ -32,6 +32,15 @@ class CinematicControlRoomApp {
     this.throughputCanvas = document.getElementById('throughputChartCanvas');
     this.throughputCtx = this.throughputCanvas ? this.throughputCanvas.getContext('2d') : null;
 
+    // 8-State Data Model Tracking
+    this.lastSuccessfulTelemetryTimestamp = null;
+    this.lastSuccessfulQueryTimestamp = null;
+    this.lastSuccessfulResults = null;
+    this.lastSuccessfulGroundTruth = null;
+    this.isEngineOnline = false;
+    this.isTelemetryLive = false;
+    this.staleCheckTimer = null;
+
     this.init();
   }
 
@@ -39,6 +48,7 @@ class CinematicControlRoomApp {
     this.initCanvases();
     this.bindEvents();
     this.bindNavigation();
+    this.startStaleChecker();
     this.connectWebSocket();
     await this.loadDatasetQueries();
     await this.fetchSegments();
@@ -213,7 +223,9 @@ class CinematicControlRoomApp {
 
       this.ws.onopen = () => {
         this.logEvent('SYSTEM', 'WebSocket telemetry stream connected at 10Hz.');
-        this.setEngineOnline(true);
+        this.setEngineState(true);
+        this.isTelemetryLive = true;
+        this.setTelemetryState('LIVE');
         if (this.pollTimer) {
           clearInterval(this.pollTimer);
           this.pollTimer = null;
@@ -223,6 +235,11 @@ class CinematicControlRoomApp {
       this.ws.onmessage = (event) => {
         try {
           const stats = JSON.parse(event.data);
+          this.lastSuccessfulTelemetryTimestamp = Date.now();
+          this.isTelemetryLive = true;
+          this.setEngineState(true);
+          this.setTelemetryState('LIVE');
+          this.setSignalCardTags('LIVE');
           this.handleTelemetryUpdate(stats);
         } catch (e) {
           console.error('Failed to parse telemetry frame:', e);
@@ -230,16 +247,19 @@ class CinematicControlRoomApp {
       };
 
       this.ws.onclose = () => {
+        this.isTelemetryLive = false;
+        this.setTelemetryState('STALE', 1);
         this.logEvent('WARN', 'WebSocket disconnected. Falling back to HTTP polling.');
-        this.setEngineOnline(false);
         this.startPollingFallback();
         setTimeout(() => this.connectWebSocket(), 3000);
       };
 
       this.ws.onerror = () => {
-        this.setEngineOnline(false);
+        this.isTelemetryLive = false;
+        this.setTelemetryState('ERROR');
       };
     } catch (e) {
+      this.isTelemetryLive = false;
       this.startPollingFallback();
     }
   }
@@ -251,30 +271,84 @@ class CinematicControlRoomApp {
           const res = await fetch(`${this.apiBase}/api/stats`);
           if (res.ok) {
             const stats = await res.json();
+            this.lastSuccessfulTelemetryTimestamp = Date.now();
+            this.isTelemetryLive = true;
+            this.setEngineState(true);
+            this.setTelemetryState('LIVE');
+            this.setSignalCardTags('LIVE');
             this.handleTelemetryUpdate(stats);
-            this.setEngineOnline(true);
+          } else {
+            this.setEngineState(false, 'ENGINE: HTTP ERROR');
+            this.isTelemetryLive = false;
+            this.setTelemetryState('ERROR');
           }
         } catch {
-          this.setEngineOnline(false);
+          this.setEngineState(false, 'ENGINE: CONNECTION LOST');
+          this.isTelemetryLive = false;
+          this.setTelemetryState('UNAVAILABLE');
         }
-      }, 1000);
+      }, 1500);
     }
   }
 
-  setEngineOnline(isOnline, statusMessage, statusType) {
+  startStaleChecker() {
+    this.staleCheckTimer = setInterval(() => {
+      const now = Date.now();
+      
+      if (this.lastSuccessfulTelemetryTimestamp) {
+        const elapsedSec = Math.round((now - this.lastSuccessfulTelemetryTimestamp) / 1000);
+        
+        // If no message within 3.5s, consider telemetry stale
+        if (elapsedSec > 3 && this.isTelemetryLive) {
+          this.isTelemetryLive = false;
+        }
+
+        if (!this.isTelemetryLive) {
+          if (elapsedSec <= 45) {
+            this.setTelemetryState('STALE', elapsedSec);
+            this.setSignalCardTags('STALE', elapsedSec);
+          } else {
+            this.setTelemetryState('UNAVAILABLE');
+            this.setSignalCardTags('UNAVAILABLE');
+            this.clearLiveTelemetryToUnavailable();
+          }
+        }
+      } else {
+        // Still initializing or initial connection failed
+        if (!this.isEngineOnline) {
+          this.setTelemetryState('UNAVAILABLE');
+          this.setSignalCardTags('UNAVAILABLE');
+          this.clearLiveTelemetryToUnavailable();
+        } else {
+          this.setTelemetryState('LOADING');
+          this.setSignalCardTags('LOADING');
+        }
+      }
+    }, 1000);
+  }
+
+  setEngineState(isOnline, statusMessage, statusType) {
+    this.isEngineOnline = isOnline;
     const chip = document.getElementById('engineStatusChip');
     const txt = document.getElementById('engineStatusText');
+    const banner = document.getElementById('offlineBanner');
+    
+    if (banner) {
+      if (isOnline) banner.classList.add('hidden');
+      else banner.classList.remove('hidden');
+    }
+
     if (!chip || !txt) return;
 
     if (!isOnline) {
       chip.className = 'system-status-pill status-offline';
-      txt.textContent = statusMessage || 'TELEMETRY UNAVAILABLE';
+      txt.textContent = statusMessage || 'ENGINE: CONNECTION LOST';
       return;
     }
 
     if (this.latestStats && this.latestStats.recovering) {
       chip.className = 'system-status-pill status-recovering';
-      txt.textContent = 'RECOVERY IN PROGRESS';
+      txt.textContent = 'ENGINE: RECOVERING';
       return;
     }
 
@@ -285,7 +359,101 @@ class CinematicControlRoomApp {
     }
 
     chip.className = 'system-status-pill';
-    txt.textContent = 'ENGINE ONLINE';
+    txt.textContent = 'ENGINE: ONLINE';
+  }
+
+  setTelemetryState(state, elapsedSec) {
+    const chip = document.getElementById('telemetryStatusChip');
+    const txt = document.getElementById('telemetryStatusText');
+    const dot = document.getElementById('telemetryPulseDot');
+    if (!chip || !txt) return;
+
+    switch (state) {
+      case 'LIVE':
+        chip.className = 'telemetry-status-pill';
+        txt.textContent = 'TELEMETRY: LIVE';
+        if (dot) dot.textContent = '●';
+        break;
+
+      case 'STALE':
+        chip.className = 'telemetry-status-pill status-stale';
+        txt.textContent = `TELEMETRY: STALE · ${elapsedSec || 1}s`;
+        if (dot) dot.textContent = '○';
+        break;
+
+      case 'UNAVAILABLE':
+        chip.className = 'telemetry-status-pill status-unavailable';
+        txt.textContent = 'TELEMETRY: UNAVAILABLE';
+        if (dot) dot.textContent = '○';
+        break;
+
+      case 'ERROR':
+        chip.className = 'telemetry-status-pill status-error';
+        txt.textContent = 'TELEMETRY: ERROR';
+        if (dot) dot.textContent = '×';
+        break;
+
+      case 'LOADING':
+      default:
+        chip.className = 'telemetry-status-pill status-unavailable';
+        txt.textContent = 'TELEMETRY: CONNECTING…';
+        if (dot) dot.textContent = '◌';
+        break;
+    }
+  }
+
+  setSignalCardTags(state, elapsedSec) {
+    const setTag = (id, text, cls) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.className = `source-tag ${cls}`;
+        el.textContent = text;
+      }
+    };
+
+    if (state === 'LIVE') {
+      setTag('sigWriteTag', '● LIVE', 'source-live');
+      setTag('sigQueryTag', '● LIVE', 'source-live');
+      setTag('sigP99Tag', 'MEASURED', 'source-measured');
+      setTag('sigMemtableTag', '● LIVE', 'source-live');
+    } else if (state === 'STALE') {
+      const label = `STALE · ${elapsedSec}s`;
+      setTag('sigWriteTag', label, 'source-stale');
+      setTag('sigQueryTag', label, 'source-stale');
+      setTag('sigP99Tag', label, 'source-stale');
+      setTag('sigMemtableTag', label, 'source-stale');
+    } else if (state === 'UNAVAILABLE') {
+      setTag('sigWriteTag', 'NOT AVAILABLE', 'source-unavailable');
+      setTag('sigQueryTag', 'NOT AVAILABLE', 'source-unavailable');
+      setTag('sigP99Tag', 'NOT AVAILABLE', 'source-unavailable');
+      setTag('sigMemtableTag', 'NOT AVAILABLE', 'source-unavailable');
+    } else if (state === 'LOADING') {
+      setTag('sigWriteTag', 'LOADING', 'source-loading');
+      setTag('sigQueryTag', 'LOADING', 'source-loading');
+      setTag('sigP99Tag', 'LOADING', 'source-loading');
+      setTag('sigMemtableTag', 'LOADING', 'source-loading');
+    }
+  }
+
+  clearLiveTelemetryToUnavailable() {
+    this.setText('writeRateDisplay', '—');
+    this.setText('writeRateUnit', 'DATA UNAVAILABLE');
+    this.setText('queryRateDisplay', '—');
+    this.setText('queryRateUnit', 'DATA UNAVAILABLE');
+    this.setText('p99LatencyDisplay', '—');
+    this.setText('p99RateUnit', 'DATA UNAVAILABLE');
+    this.setText('p50LatencyDisplay', '—');
+    this.setText('p95LatencyDisplay', '—');
+    this.setText('nodeMemtableCount', '— / 5,000');
+    this.setText('memFillPct', 'DATA UNAVAILABLE');
+    this.setText('nodeWalSize', 'WAL: UNAVAILABLE');
+    this.setText('nodeIngestRate', 'TELEMETRY UNAVAILABLE');
+
+    this.setStyle('writeProgressBar', 'width', '0%');
+    this.setStyle('queryProgressBar', 'width', '0%');
+    this.setStyle('latencyProgressBar', 'width', '0%');
+    this.setStyle('memFillProgressBar', 'width', '0%');
+    this.setStyle('reservoirLiquid', 'height', '0%');
   }
 
   handleTelemetryUpdate(stats) {
@@ -293,13 +461,13 @@ class CinematicControlRoomApp {
 
     // Check engine states
     if (stats.recovering) {
-      this.setEngineOnline(true, 'RECOVERY IN PROGRESS');
+      this.setEngineState(true, 'ENGINE: RECOVERING');
     } else if (stats.status === 'degraded') {
-      this.setEngineOnline(true, 'ENGINE DEGRADED', 'status-warn');
+      this.setEngineState(true, 'ENGINE DEGRADED', 'status-warn');
     } else if (stats.wal_error) {
-      this.setEngineOnline(true, 'WAL ERROR', 'status-offline');
+      this.setEngineState(true, 'WAL ERROR', 'status-offline');
     } else {
-      this.setEngineOnline(true, 'ENGINE ONLINE');
+      this.setEngineState(true, 'ENGINE: ONLINE');
     }
 
     const writeQps = stats.write_qps ?? stats.write_throughput_qps ?? 0;
@@ -416,19 +584,43 @@ class CinematicControlRoomApp {
   // --------------------------------------------------------------------------
 
   async fetchSegments() {
+    const segTag = document.getElementById('segmentSourceTag');
     try {
       const res = await fetch(`${this.apiBase}/api/segments`);
       if (res.ok) {
         const data = await res.json();
         this.segments = Array.isArray(data) ? data : (data.segments || []);
+        if (segTag) {
+          segTag.className = 'source-tag source-live';
+          segTag.textContent = '● LIVE';
+        }
         this.renderSegmentMatrix();
         const countStr = `${this.segments.length} Segments Published`;
         this.setText('nodeSegmentCount', countStr);
         this.setText('planeSegmentCount', `${this.segments.length} Published`);
+      } else {
+        throw new Error(`HTTP ${res.status}`);
       }
     } catch (e) {
       console.warn('Failed to fetch segments:', e);
+      if (segTag) {
+        segTag.className = 'source-tag source-unavailable';
+        segTag.textContent = 'UNAVAILABLE';
+      }
+      this.renderSegmentErrorFallback();
     }
+  }
+
+  renderSegmentErrorFallback() {
+    const grid = document.getElementById('segmentMatrixGrid');
+    if (!grid) return;
+    grid.innerHTML = `
+      <div class="fallback-state-box">
+        <div class="fallback-title">SEGMENT METADATA UNAVAILABLE</div>
+        <div class="fallback-sub">The storage engine did not provide segment information. Verify connection to :8080.</div>
+        <button class="nav-action-btn action-inject" onclick="window.app.fetchSegments()">RETRY LOAD SEGMENTS</button>
+      </div>
+    `;
   }
 
   renderSegmentMatrix() {
@@ -567,7 +759,12 @@ class CinematicControlRoomApp {
     // Animate Fan-Out Tracer Box
     const tracerBox = document.getElementById('fanoutTargetsList');
     const tracerStatus = document.getElementById('fanoutStatusText');
+    const searchSourceTag = document.getElementById('searchSourceTag');
     if (tracerStatus) tracerStatus.textContent = 'FANNING OUT';
+    if (searchSourceTag) {
+      searchSourceTag.className = 'source-tag source-loading';
+      searchSourceTag.textContent = 'EXECUTING';
+    }
 
     const startTime = performance.now();
 
@@ -602,6 +799,10 @@ class CinematicControlRoomApp {
         chipsHtml += `<span class="tracer-node-chip">Top-K Heap Merge <span class="tracer-latency">38µs</span></span>`;
         if (tracerBox) tracerBox.innerHTML = chipsHtml;
         if (tracerStatus) tracerStatus.textContent = `MERGED (${elapsedMs}ms)`;
+        if (searchSourceTag) {
+          searchSourceTag.className = 'source-tag source-live';
+          searchSourceTag.textContent = '● LIVE RESULT';
+        }
 
         // Calculate Ground Truth Recall@10
         let matchedCount = 0;
@@ -615,20 +816,85 @@ class CinematicControlRoomApp {
           ? ((matchedCount / Math.min(groundTruthTop10.length, kVal)) * 100).toFixed(1)
           : '100.0';
 
+        this.lastSuccessfulQueryTimestamp = new Date().toLocaleTimeString();
+        this.lastSuccessfulResults = results;
+        this.lastSuccessfulGroundTruth = groundTruthTop10;
+
         this.setText('queryStatsSummary', `Latency: ${elapsedMs}ms • Recall@10: ${recallPct}%`);
         this.renderResultsTable(results, groundTruthTop10);
         this.logEvent('QUERY', `k-NN (k=${kVal}) completed in ${elapsedMs}ms with ${recallPct}% Recall@10.`);
+      } else {
+        throw new Error(`Server returned HTTP ${res.status}`);
+      }
     } catch (e) {
       console.error('Query failed:', e);
       if (tracerStatus) tracerStatus.textContent = 'SEARCH ERROR';
-      this.setText('queryStatsSummary', 'SEARCH ERROR • Engine Unreachable');
-      this.setEngineOnline(true, 'SEARCH ERROR', 'status-offline');
-      this.logEvent('ERROR', 'Query execution failed: SEARCH ERROR.');
+      if (searchSourceTag) {
+        searchSourceTag.className = 'source-tag source-error';
+        searchSourceTag.textContent = 'SEARCH UNAVAILABLE';
+      }
+      this.setText('queryStatsSummary', 'SEARCH UNAVAILABLE • Connection error');
+      this.logEvent('ERROR', 'Query execution failed: The vector engine did not return a response.');
+      this.renderSearchErrorFallback();
     } finally {
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = '<span class="btn-glyph">🔍</span> RUN SEARCH &rarr;';
       }
+    }
+  }
+
+  renderSearchErrorFallback() {
+    const tbody = document.getElementById('resultsTableBody');
+    if (!tbody) return;
+
+    if (this.lastSuccessfulResults && this.lastSuccessfulResults.length > 0) {
+      const banner = `
+        <tr>
+          <td colspan="6" style="padding:0;">
+            <div class="last-successful-banner">
+              <span>● LAST SUCCESSFUL RESULT (Preserved) &bull; Timestamp: ${this.lastSuccessfulQueryTimestamp}</span>
+              <button class="action-ghost-sm" onclick="window.app.runQuery()">RETRY SEARCH</button>
+            </div>
+          </td>
+        </tr>
+      `;
+      const gtSet = new Set(this.lastSuccessfulGroundTruth || []);
+      const rowsHtml = this.lastSuccessfulResults.map((item, idx) => {
+        const vecId = item.id ?? item.vector_id;
+        const isGt = gtSet.has(vecId);
+        const scoreVal = item.score ?? item.cosine_similarity ?? (1.0 - (item.distance || 0));
+        const distVal = item.distance ?? (1.0 - scoreVal);
+        const sim = Number(scoreVal).toFixed(4);
+        const dist = Number(distVal).toFixed(4);
+        const source = item.source || (idx === 0 ? 'Active MemTable' : 'S-001');
+        const verHtml = isGt 
+          ? `<span class="signal-tag tag-pass">KNN MATCH</span>` 
+          : `<span class="signal-tag tag-cyan">KNN RANKED</span>`;
+        return `
+          <tr>
+            <td><span class="table-rank-badge">${idx + 1}</span></td>
+            <td><strong>#${vecId}</strong></td>
+            <td><span class="text-cyan font-mono">${sim}</span></td>
+            <td><span class="text-muted font-mono">${dist}</span></td>
+            <td><span class="table-source-pill">${source}</span></td>
+            <td>${verHtml}</td>
+          </tr>
+        `;
+      }).join('');
+      tbody.innerHTML = banner + rowsHtml;
+    } else {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="padding:0;">
+            <div class="fallback-state-box">
+              <div class="fallback-title">SEARCH UNAVAILABLE</div>
+              <div class="fallback-sub">The vector engine did not return a response. Verify that storage_server is running on :8080.</div>
+              <button class="nav-action-btn action-inject" onclick="window.app.runQuery()">RETRY SEARCH</button>
+            </div>
+          </td>
+        </tr>
+      `;
     }
   }
 
@@ -1067,6 +1333,14 @@ class CinematicControlRoomApp {
       clearLogsBtn.addEventListener('click', () => {
         const term = document.getElementById('terminalLogWindow');
         if (term) term.innerHTML = '';
+      });
+    }
+
+    const bannerRetryBtn = document.getElementById('bannerRetryBtn');
+    if (bannerRetryBtn) {
+      bannerRetryBtn.addEventListener('click', () => {
+        this.connectWebSocket();
+        this.fetchSegments();
       });
     }
 
