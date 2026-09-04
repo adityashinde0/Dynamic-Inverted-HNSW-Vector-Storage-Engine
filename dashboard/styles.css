@@ -209,6 +209,36 @@ body {
   animation: pulseBeacon 1.6s infinite ease-in-out;
 }
 
+.system-status-pill.status-offline {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+.system-status-pill.status-offline .status-pulse-core {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.system-status-pill.status-warn {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: var(--accent-amber);
+}
+.system-status-pill.status-warn .status-pulse-core {
+  background-color: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber);
+}
+
+.system-status-pill.status-recovering {
+  background: rgba(0, 210, 255, 0.1);
+  border-color: rgba(0, 210, 255, 0.35);
+  color: var(--accent-cyan);
+}
+.system-status-pill.status-recovering .status-pulse-core {
+  background-color: var(--accent-cyan);
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
 @keyframes pulseBeacon {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.3; transform: scale(0.85); }

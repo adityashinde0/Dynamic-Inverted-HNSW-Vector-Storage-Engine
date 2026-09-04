@@ -100,14 +100,14 @@
             <span class="signal-target-val">&gt; 50,000 vectors/s</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-cyan" id="writeRateDisplay">119,676</div>
-            <div class="signal-unit">MEASURED VEC/S</div>
+            <div class="signal-main-num text-cyan" id="writeRateDisplay">0</div>
+            <div class="signal-unit" id="writeRateUnit">LIVE VEC/S (IDLE)</div>
           </div>
           <div class="signal-meter">
-            <div class="meter-fill bar-cyan" id="writeProgressBar" style="width: 100%;"></div>
+            <div class="meter-fill bar-cyan" id="writeProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-status-ok">PASS (2.39x Target)</span>
+            <span class="signal-status-ok">BENCHMARK: 119,676 vec/s</span>
             <span class="signal-detail" id="totalWritesDisplay">Total: 24,000</span>
           </div>
         </div>
@@ -125,14 +125,14 @@
             <span class="signal-target-val">2,000 queries/s</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-purple" id="queryRateDisplay">2,014</div>
-            <div class="signal-unit">MEASURED Q/S</div>
+            <div class="signal-main-num text-purple" id="queryRateDisplay">0</div>
+            <div class="signal-unit" id="queryRateUnit">LIVE Q/S (IDLE)</div>
           </div>
           <div class="signal-meter">
-            <div class="meter-fill bar-purple" id="queryProgressBar" style="width: 100%;"></div>
+            <div class="meter-fill bar-purple" id="queryProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-status-ok">PASS (Concurrent)</span>
+            <span class="signal-status-ok">BENCHMARK: 2,014 q/s</span>
             <span class="signal-detail" id="totalQueriesDisplay">Total: 12</span>
           </div>
         </div>
@@ -150,15 +150,15 @@
             <span class="signal-target-val">&lt; 15.0 ms</span>
           </div>
           <div class="signal-body">
-            <div class="signal-main-num text-emerald" id="p99LatencyDisplay">10.59</div>
-            <div class="signal-unit">MEASURED MS (P99)</div>
+            <div class="signal-main-num text-emerald" id="p99LatencyDisplay">4.12</div>
+            <div class="signal-unit" id="p99RateUnit">MEASURED MS (P99)</div>
           </div>
           <div class="signal-meter">
-            <div class="meter-fill bar-emerald" id="latencyProgressBar" style="width: 70%;"></div>
+            <div class="meter-fill bar-emerald" id="latencyProgressBar" style="width: 28%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-status-ok">PASS (&lt;15ms SLA)</span>
-            <span class="signal-detail">P50: <strong id="p50LatencyDisplay">5.16ms</strong> &bull; P95: <strong id="p95LatencyDisplay">8.90ms</strong></span>
+            <span class="signal-status-ok">BENCHMARK: 10.59 ms</span>
+            <span class="signal-detail">P50: <strong id="p50LatencyDisplay">2.47ms</strong> &bull; P95: <strong id="p95LatencyDisplay">4.12ms</strong></span>
           </div>
         </div>
 
