@@ -69,22 +69,24 @@
 
         <!-- Technical Credibility Row (Architecture Capabilities, No Fake Trust Logos) -->
         <div class="tech-credibility-row">
-          <span class="cred-item">CRC32 WAL</span>
+          <span class="cred-item">RUST / C++</span>
           <span class="cred-sep">&bull;</span>
-          <span class="cred-item">LOCK-FREE MEMTABLE</span>
+          <span class="cred-item">GO gRPC</span>
           <span class="cred-sep">&bull;</span>
-          <span class="cred-item">IMMUTABLE SEGMENTS</span>
+          <span class="cred-item">WAL</span>
           <span class="cred-sep">&bull;</span>
-          <span class="cred-item">HNSW GRAPH (M=16)</span>
+          <span class="cred-item">MEMTABLE</span>
           <span class="cred-sep">&bull;</span>
-          <span class="cred-item">SQ8 QUANTIZATION (3.55x)</span>
+          <span class="cred-item">HNSW</span>
           <span class="cred-sep">&bull;</span>
-          <span class="cred-item">gRPC CONCURRENCY</span>
+          <span class="cred-item">QUANTIZATION</span>
+          <span class="cred-sep">&bull;</span>
+          <span class="cred-item">TYPESCRIPT TELEMETRY</span>
         </div>
       </div>
     </header>
 
-    <!-- 3. Live Infrastructure Telemetry Strip (Observable Signals: Target != Measured) -->
+    <!-- 3. Live Infrastructure Telemetry Strip (Observable Signals: TARGET != MEASURED) -->
     <section class="telemetry-strip-container">
       <div class="telemetry-strip">
         <!-- Signal 1: Write Throughput -->
@@ -93,15 +95,19 @@
             <span class="signal-title">WRITE THROUGHPUT</span>
             <span class="signal-tag tag-pass">SLA EXCEEDED</span>
           </div>
+          <div class="signal-target-row">
+            <span class="signal-target-lbl">TARGET</span>
+            <span class="signal-target-val">&gt; 50,000 vectors/s</span>
+          </div>
           <div class="signal-body">
             <div class="signal-main-num text-cyan" id="writeRateDisplay">119,676</div>
-            <div class="signal-unit">VECTORS / SEC</div>
+            <div class="signal-unit">MEASURED VEC/S</div>
           </div>
           <div class="signal-meter">
             <div class="meter-fill bar-cyan" id="writeProgressBar" style="width: 100%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-target">Target: &gt; 50,000 v/s</span>
+            <span class="signal-status-ok">PASS (2.39x Target)</span>
             <span class="signal-detail" id="totalWritesDisplay">Total: 24,000</span>
           </div>
         </div>
@@ -114,15 +120,19 @@
             <span class="signal-title">CONCURRENT SEARCH</span>
             <span class="signal-tag tag-purple">LOCK-FREE</span>
           </div>
+          <div class="signal-target-row">
+            <span class="signal-target-lbl">TARGET</span>
+            <span class="signal-target-val">2,000 queries/s</span>
+          </div>
           <div class="signal-body">
             <div class="signal-main-num text-purple" id="queryRateDisplay">2,014</div>
-            <div class="signal-unit">QUERIES / SEC</div>
+            <div class="signal-unit">MEASURED Q/S</div>
           </div>
           <div class="signal-meter">
             <div class="meter-fill bar-purple" id="queryProgressBar" style="width: 100%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-target">Target: 2,000 q/s</span>
+            <span class="signal-status-ok">PASS (Concurrent)</span>
             <span class="signal-detail" id="totalQueriesDisplay">Total: 12</span>
           </div>
         </div>
@@ -135,15 +145,19 @@
             <span class="signal-title">P99 SEARCH LATENCY</span>
             <span class="signal-tag tag-emerald">SLA PASS</span>
           </div>
+          <div class="signal-target-row">
+            <span class="signal-target-lbl">TARGET</span>
+            <span class="signal-target-val">&lt; 15.0 ms</span>
+          </div>
           <div class="signal-body">
             <div class="signal-main-num text-emerald" id="p99LatencyDisplay">10.59</div>
-            <div class="signal-unit">MILLISECONDS</div>
+            <div class="signal-unit">MEASURED MS (P99)</div>
           </div>
           <div class="signal-meter">
             <div class="meter-fill bar-emerald" id="latencyProgressBar" style="width: 70%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-target">Target: &lt; 15.0 ms</span>
+            <span class="signal-status-ok">PASS (&lt;15ms SLA)</span>
             <span class="signal-detail">P50: <strong id="p50LatencyDisplay">5.16ms</strong> &bull; P95: <strong id="p95LatencyDisplay">8.90ms</strong></span>
           </div>
         </div>
@@ -156,6 +170,10 @@
             <span class="signal-title">ACTIVE MEMTABLE</span>
             <span class="signal-tag tag-amber" id="memtableStateBadge">ACTIVE</span>
           </div>
+          <div class="signal-target-row">
+            <span class="signal-target-lbl">THRESHOLD</span>
+            <span class="signal-target-val">5,000 vectors</span>
+          </div>
           <div class="signal-body">
             <div class="signal-main-num text-amber" id="nodeMemtableCount">0 / 5,000</div>
             <div class="signal-unit" id="memFillPct">0% CAPACITY</div>
@@ -164,7 +182,7 @@
             <div class="meter-fill bar-amber" id="memFillProgressBar" style="width: 0%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-target">Threshold: 5,000</span>
+            <span class="signal-status-ok">Lock-free Reader</span>
             <span class="signal-detail" id="nodeSegmentCount">6 Segments Published</span>
           </div>
         </div>
@@ -177,6 +195,10 @@
             <span class="signal-title">WAL &amp; COMPRESSION</span>
             <span class="signal-tag tag-cyan">100% RECOVERY</span>
           </div>
+          <div class="signal-target-row">
+            <span class="signal-target-lbl">TARGET</span>
+            <span class="signal-target-val">Zero Loss &bull; 3x+</span>
+          </div>
           <div class="signal-body">
             <div class="signal-main-num text-cyan">3.55x</div>
             <div class="signal-unit">SQ8 COMPRESSION</div>
@@ -185,7 +207,7 @@
             <div class="meter-fill bar-cyan" style="width: 72%;"></div>
           </div>
           <div class="signal-footer">
-            <span class="signal-target">CRC32 Checksummed</span>
+            <span class="signal-status-ok">CRC32 Checksummed</span>
             <span class="signal-detail" id="nodeWalSize">WAL: 6.4 MB</span>
           </div>
         </div>
