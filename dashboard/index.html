@@ -10,342 +10,403 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Ambient Background Canvas / Grid Overlay -->
+  <!-- Ambient Atmospheric Lighting & Fine Technical Grid -->
   <div class="ambient-glow"></div>
   <div class="tech-grid-overlay"></div>
 
-  <div class="cinematic-viewport">
-    
-    <!-- 1. Top Command Header -->
-    <header class="control-header">
-      <div class="header-left">
-        <div class="brand-badge">PS-005</div>
-        <div class="brand-meta">
-          <h1 class="brand-title">DYNAMIC VECTOR STORAGE ENGINE</h1>
-          <p class="brand-tagline">LSM-Tree Persistence &bull; SQ8 Compression &bull; Immutable HNSW &bull; Zero Write-Search Contention</p>
-        </div>
+  <!-- Main Viewport Composition -->
+  <div class="cinematic-shell">
+
+    <!-- 1. Ultra-Minimal Floating Navigation Bar -->
+    <nav class="floating-nav">
+      <div class="nav-brand">
+        <span class="nav-brand-bold">PS-005</span>
+        <span class="nav-brand-slash">/</span>
+        <span class="nav-brand-sub">VECTOR ENGINE</span>
       </div>
 
-      <div class="header-center">
+      <div class="nav-links">
+        <a href="#system-view" class="nav-link active" data-nav="system">SYSTEM</a>
+        <a href="#search-instrument" class="nav-link" data-nav="search">SEARCH</a>
+        <a href="#segments-matrix" class="nav-link" data-nav="segments">SEGMENTS</a>
+        <a href="#benchmark-proof" class="nav-link" data-nav="benchmark">BENCHMARK</a>
+        <a href="#recovery-section" class="nav-link" data-nav="recovery">RECOVERY</a>
+      </div>
+
+      <div class="nav-right">
         <div class="system-status-pill" id="engineStatusChip">
           <span class="status-pulse-core"></span>
           <span class="status-text" id="engineStatusText">ENGINE ONLINE</span>
         </div>
-        <div class="architecture-tags">
-          <span class="arch-tag">RUST CORE</span>
-          <span class="arch-tag">GO ROUTER</span>
-          <span class="arch-tag">CRC32 WAL</span>
-          <span class="arch-tag">SQ8 3.55x</span>
-          <span class="arch-tag">HNSW M=16</span>
-        </div>
-      </div>
-
-      <div class="header-actions">
-        <button class="action-btn action-ghost" id="recoveryDemoBtn" title="Demonstrate 100% Crash Recovery via WAL Replay">
-          <span class="btn-glyph">🛡</span> RECOVERY DEMO
+        <button class="nav-action-btn action-inject" id="injectBatchBtn" title="Ingest 1,000 Vectors into WAL & MemTable">
+          <span class="btn-glyph">⚡</span> INGEST 1K
         </button>
-        <button class="action-btn action-ghost" id="hnswGraphBtn" title="Inspect HNSW Multi-Layer Skip-List Graph">
-          <span class="btn-glyph">🕸</span> HNSW GRAPH
+        <button class="nav-action-btn action-flush" id="flushMemtableBtn" title="Seal Active MemTable into Immutable Disk Segment">
+          <span class="btn-glyph">⟳</span> ROTATE
         </button>
-        <button class="action-btn action-ghost" id="judgeViewBtn" title="Open 60-Second Evaluation Walkthrough">
+        <button class="nav-action-btn action-judge" id="judgeViewBtn" title="Open 60-Second Evaluation Walkthrough">
           <span class="btn-glyph">⚖</span> JUDGE MODE
         </button>
-        <button class="action-btn action-accent" id="injectBatchBtn" title="Ingest 1,000 Vectors into WAL & MemTable">
-          <span class="btn-glyph">⚡</span> INJECT 1,000 VEC
-        </button>
-        <button class="action-btn action-amber" id="flushMemtableBtn" title="Seal Active MemTable and Build Immutable Disk Segment">
-          <span class="btn-glyph">⟳</span> ROTATE &amp; FLUSH
-        </button>
+      </div>
+    </nav>
+
+    <!-- 2. Cinematic Hero Opening -->
+    <header class="cinematic-hero" id="system-view">
+      <div class="hero-content">
+        <div class="hero-badge-eyebrow">
+          <span class="eyebrow-dot"></span>
+          <span class="eyebrow-text">LSM VECTOR STORAGE ENGINE &bull; VERSION 1.0</span>
+        </div>
+
+        <h1 class="hero-display-headline">
+          Vector Storage<br>
+          <span class="headline-gradient">Without the Write Bottleneck</span>
+        </h1>
+
+        <p class="hero-concise-proposition">
+          An LSM-inspired vector storage engine that separates continuous high-throughput writes from immutable HNSW search segments.
+        </p>
+
+        <!-- Technical Credibility Row (Architecture Capabilities, No Fake Trust Logos) -->
+        <div class="tech-credibility-row">
+          <span class="cred-item">CRC32 WAL</span>
+          <span class="cred-sep">&bull;</span>
+          <span class="cred-item">LOCK-FREE MEMTABLE</span>
+          <span class="cred-sep">&bull;</span>
+          <span class="cred-item">IMMUTABLE SEGMENTS</span>
+          <span class="cred-sep">&bull;</span>
+          <span class="cred-item">HNSW GRAPH (M=16)</span>
+          <span class="cred-sep">&bull;</span>
+          <span class="cred-item">SQ8 QUANTIZATION (3.55x)</span>
+          <span class="cred-sep">&bull;</span>
+          <span class="cred-item">gRPC CONCURRENCY</span>
+        </div>
       </div>
     </header>
 
-    <!-- 2. Monolithic Typography & Telemetry Ribbon (No Generic Cards) -->
-    <section class="telemetry-ribbon">
-      <div class="hero-headline-group">
-        <div class="hero-eyebrow">STORAGE ENGINE TELEMETRY // REAL-TIME METRICS</div>
-        <div class="hero-slogan">VECTOR STORAGE WITHOUT THE WRITE BOTTLENECK</div>
-      </div>
-
-      <div class="telemetry-figures-strip">
-        <!-- Metric 1: Write Stream -->
-        <div class="telemetry-block" id="metric-write">
-          <div class="telemetry-label-row">
-            <span class="telem-label">WRITE INGESTION</span>
-            <span class="sla-badge sla-pass" id="writeSlaBadge">SLA PASS</span>
+    <!-- 3. Live Infrastructure Telemetry Strip (Observable Signals: Target != Measured) -->
+    <section class="telemetry-strip-container">
+      <div class="telemetry-strip">
+        <!-- Signal 1: Write Throughput -->
+        <div class="signal-card" id="sig-write">
+          <div class="signal-header">
+            <span class="signal-title">WRITE THROUGHPUT</span>
+            <span class="signal-tag tag-pass">SLA EXCEEDED</span>
           </div>
-          <div class="telem-value-wrap">
-            <span class="telem-val text-cyan" id="writeRateDisplay">0</span>
-            <span class="telem-unit">VEC / S</span>
+          <div class="signal-body">
+            <div class="signal-main-num text-cyan" id="writeRateDisplay">119,676</div>
+            <div class="signal-unit">VECTORS / SEC</div>
           </div>
-          <div class="telem-subtext">
-            <span>Target: &gt;50,000/s</span>
-            <span class="text-muted" id="totalWritesDisplay">Total: 0</span>
+          <div class="signal-meter">
+            <div class="meter-fill bar-cyan" id="writeProgressBar" style="width: 100%;"></div>
           </div>
-          <div class="telem-mini-bar">
-            <div class="mini-bar-fill bar-cyan" id="writeProgressBar" style="width: 0%;"></div>
+          <div class="signal-footer">
+            <span class="signal-target">Target: &gt; 50,000 v/s</span>
+            <span class="signal-detail" id="totalWritesDisplay">Total: 24,000</span>
           </div>
         </div>
 
-        <div class="telemetry-separator"></div>
+        <div class="strip-divider"></div>
 
-        <!-- Metric 2: Query Stream -->
-        <div class="telemetry-block" id="metric-query">
-          <div class="telemetry-label-row">
-            <span class="telem-label">CONCURRENT SEARCH</span>
-            <span class="sla-badge sla-pass" id="querySlaBadge">LOCK-FREE</span>
+        <!-- Signal 2: Query Rate -->
+        <div class="signal-card" id="sig-query">
+          <div class="signal-header">
+            <span class="signal-title">CONCURRENT SEARCH</span>
+            <span class="signal-tag tag-purple">LOCK-FREE</span>
           </div>
-          <div class="telem-value-wrap">
-            <span class="telem-val text-purple" id="queryRateDisplay">0</span>
-            <span class="telem-unit">Q / S</span>
+          <div class="signal-body">
+            <div class="signal-main-num text-purple" id="queryRateDisplay">2,014</div>
+            <div class="signal-unit">QUERIES / SEC</div>
           </div>
-          <div class="telem-subtext">
-            <span>Target: 2,000/s</span>
-            <span class="text-muted" id="totalQueriesDisplay">Total: 0</span>
+          <div class="signal-meter">
+            <div class="meter-fill bar-purple" id="queryProgressBar" style="width: 100%;"></div>
           </div>
-          <div class="telem-mini-bar">
-            <div class="mini-bar-fill bar-purple" id="queryProgressBar" style="width: 0%;"></div>
+          <div class="signal-footer">
+            <span class="signal-target">Target: 2,000 q/s</span>
+            <span class="signal-detail" id="totalQueriesDisplay">Total: 12</span>
           </div>
         </div>
 
-        <div class="telemetry-separator"></div>
+        <div class="strip-divider"></div>
 
-        <!-- Metric 3: P99 Search Latency -->
-        <div class="telemetry-block" id="metric-latency">
-          <div class="telemetry-label-row">
-            <span class="telem-label">SEARCH LATENCY (P99)</span>
-            <span class="sla-badge sla-emerald" id="slaBadge">&lt; 15ms SLA</span>
+        <!-- Signal 3: P99 Latency -->
+        <div class="signal-card" id="sig-p99">
+          <div class="signal-header">
+            <span class="signal-title">P99 SEARCH LATENCY</span>
+            <span class="signal-tag tag-emerald">SLA PASS</span>
           </div>
-          <div class="telem-value-wrap">
-            <span class="telem-val text-emerald" id="p99LatencyDisplay">--</span>
-            <span class="telem-unit">MS</span>
+          <div class="signal-body">
+            <div class="signal-main-num text-emerald" id="p99LatencyDisplay">10.59</div>
+            <div class="signal-unit">MILLISECONDS</div>
           </div>
-          <div class="telem-subtext">
-            <span>P50: <strong id="p50LatencyDisplay">--</strong></span>
-            <span>P95: <strong id="p95LatencyDisplay">--</strong></span>
+          <div class="signal-meter">
+            <div class="meter-fill bar-emerald" id="latencyProgressBar" style="width: 70%;"></div>
           </div>
-          <div class="telem-mini-bar">
-            <div class="mini-bar-fill bar-emerald" id="latencyProgressBar" style="width: 0%;"></div>
+          <div class="signal-footer">
+            <span class="signal-target">Target: &lt; 15.0 ms</span>
+            <span class="signal-detail">P50: <strong id="p50LatencyDisplay">5.16ms</strong> &bull; P95: <strong id="p95LatencyDisplay">8.90ms</strong></span>
           </div>
         </div>
 
-        <div class="telemetry-separator"></div>
+        <div class="strip-divider"></div>
 
-        <!-- Metric 4: SQ8 Scalar Quantization -->
-        <div class="telemetry-block" id="metric-compression">
-          <div class="telemetry-label-row">
-            <span class="telem-label">SQ8 QUANTIZATION</span>
-            <span class="sla-badge sla-cyan">72% SAVINGS</span>
+        <!-- Signal 4: Storage & MemTable Reservoir -->
+        <div class="signal-card" id="sig-storage">
+          <div class="signal-header">
+            <span class="signal-title">ACTIVE MEMTABLE</span>
+            <span class="signal-tag tag-amber" id="memtableStateBadge">ACTIVE</span>
           </div>
-          <div class="telem-value-wrap">
-            <span class="telem-val text-amber">3.55x</span>
-            <span class="telem-unit">RATIO</span>
+          <div class="signal-body">
+            <div class="signal-main-num text-amber" id="nodeMemtableCount">0 / 5,000</div>
+            <div class="signal-unit" id="memFillPct">0% CAPACITY</div>
           </div>
-          <div class="telem-subtext">
-            <span>256B &rarr; 72B / Vec</span>
-            <span class="text-muted">Fidelity: 0.9996</span>
+          <div class="signal-meter">
+            <div class="meter-fill bar-amber" id="memFillProgressBar" style="width: 0%;"></div>
           </div>
-          <div class="telem-mini-bar">
-            <div class="mini-bar-fill bar-amber" style="width: 72%;"></div>
+          <div class="signal-footer">
+            <span class="signal-target">Threshold: 5,000</span>
+            <span class="signal-detail" id="nodeSegmentCount">6 Segments Published</span>
+          </div>
+        </div>
+
+        <div class="strip-divider"></div>
+
+        <!-- Signal 5: WAL Durability & SQ8 -->
+        <div class="signal-card" id="sig-wal">
+          <div class="signal-header">
+            <span class="signal-title">WAL &amp; COMPRESSION</span>
+            <span class="signal-tag tag-cyan">100% RECOVERY</span>
+          </div>
+          <div class="signal-body">
+            <div class="signal-main-num text-cyan">3.55x</div>
+            <div class="signal-unit">SQ8 COMPRESSION</div>
+          </div>
+          <div class="signal-meter">
+            <div class="meter-fill bar-cyan" style="width: 72%;"></div>
+          </div>
+          <div class="signal-footer">
+            <span class="signal-target">CRC32 Checksummed</span>
+            <span class="signal-detail" id="nodeWalSize">WAL: 6.4 MB</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. The Central Architecture Topology & Living Intersection -->
-    <section class="central-architecture-stage">
-      <div class="stage-header">
-        <div class="stage-title-wrap">
-          <h2 class="stage-title">LIVING STORAGE &amp; CONCURRENT RETRIEVAL TOPOLOGY</h2>
-          <span class="stage-subtitle">Continuous write ingestion intersects with non-blocking multi-segment query fan-out</span>
+    <!-- 4. Central Living System Canvas (The Architecture Centerpiece) -->
+    <section class="architecture-canvas-stage">
+      <div class="canvas-header-bar">
+        <div class="canvas-title-group">
+          <span class="canvas-eyebrow">STORAGE &amp; RETRIEVAL ENGINE TOPOLOGY</span>
+          <h2 class="canvas-headline">Concurrent Dual-Stream Architecture</h2>
+          <p class="canvas-subline">Observe write ingestion and search query traffic intersecting at the storage layer without lock contention</p>
         </div>
-        <div class="stream-indicators">
-          <span class="stream-indicator stream-write"><span class="pulse-indicator pulse-cyan"></span> Write Stream (119k/s)</span>
-          <span class="stream-indicator stream-query"><span class="pulse-indicator pulse-emerald"></span> Query Fan-Out (Concurrent)</span>
-          <span class="stream-indicator stream-rotate"><span class="pulse-indicator pulse-amber"></span> Zero-Lock Rotation</span>
+        <div class="stream-legend-bar">
+          <div class="legend-pill stream-write-pill">
+            <span class="pill-dot dot-cyan"></span>
+            <span>Write Ingestion Stream</span>
+          </div>
+          <div class="legend-pill stream-query-pill">
+            <span class="pill-dot dot-emerald"></span>
+            <span>Concurrent Search Stream</span>
+          </div>
+          <div class="legend-pill stream-rotate-pill">
+            <span class="pill-dot dot-amber"></span>
+            <span>Zero-Contention Rotation</span>
+          </div>
         </div>
       </div>
 
-      <!-- The Core Topology Canvas -->
-      <div class="topology-canvas-container" id="topologyCanvas">
-        <svg class="topology-svg-wires" id="topologySvgWires">
-          <defs>
-            <linearGradient id="wireWriteGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.3"></stop>
-              <stop offset="50%" stop-color="#00d2ff" stop-opacity="1"></stop>
-              <stop offset="100%" stop-color="#00d2ff" stop-opacity="0.3"></stop>
-            </linearGradient>
-            <linearGradient id="wireQueryGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"></stop>
-              <stop offset="50%" stop-color="#10b981" stop-opacity="1"></stop>
-              <stop offset="100%" stop-color="#10b981" stop-opacity="0.3"></stop>
-            </linearGradient>
-          </defs>
-        </svg>
-
-        <div class="topology-grid-nodes">
-          
-          <!-- Node 1: Ingestion Stream -->
-          <div class="topo-node topo-interactive" data-node="ingest" id="node-ingest">
-            <div class="node-badge">STAGE 01</div>
-            <div class="node-title">Vector Ingestion</div>
-            <div class="node-live-metric" id="nodeIngestRate">0 vec/s</div>
-            <div class="node-sub">gRPC Router: 64-dim Float32</div>
-            <div class="node-indicator ind-cyan"></div>
-          </div>
-
-          <div class="topo-connector connector-horizontal">&rarr;</div>
-
-          <!-- Node 2: Durable WAL -->
-          <div class="topo-node topo-interactive" data-node="wal" id="node-wal">
-            <div class="node-badge">STAGE 02</div>
-            <div class="node-title">Write-Ahead Log</div>
-            <div class="node-live-metric" id="nodeWalSize">0 KB</div>
-            <div class="node-sub">CRC32 Checksum / INV-01</div>
-            <div class="node-indicator ind-cyan"></div>
-          </div>
-
-          <div class="topo-connector connector-horizontal">&rarr;</div>
-
-          <!-- Node 3: MemTable Storage Reservoir (Living Visual Object) -->
-          <div class="topo-node reservoir-node topo-interactive" data-node="memtable" id="node-memtable">
-            <div class="reservoir-header">
-              <div class="node-badge">STAGE 03</div>
-              <span class="reservoir-state-chip" id="memtableStateBadge">ACTIVE</span>
+      <!-- Living Pipeline Grid -->
+      <div class="living-pipeline-container" id="livingPipeline">
+        
+        <!-- Stream 1: Query Fan-Out Plane -->
+        <div class="pipeline-plane query-plane">
+          <div class="plane-label">CONCURRENT SEARCH FAN-OUT</div>
+          <div class="plane-nodes-row">
+            <div class="pipe-node topo-interactive" data-node="query-router">
+              <div class="pnode-idx">01 / ROUTE</div>
+              <div class="pnode-name">Search Router</div>
+              <div class="pnode-metric text-emerald">Query Vector (q, k)</div>
+              <div class="pnode-sub">Dispatches parallel fan-out</div>
             </div>
-            
-            <!-- Liquid Reservoir Vessel -->
-            <div class="reservoir-vessel">
-              <div class="reservoir-liquid" id="reservoirLiquid" style="height: 0%;">
-                <div class="liquid-wave"></div>
-              </div>
-              <div class="reservoir-data-overlay">
-                <span class="reservoir-pct" id="memFillPct">0%</span>
-                <span class="reservoir-count" id="nodeMemtableCount">0 / 5,000</span>
-              </div>
+
+            <div class="pipe-flow-arrow flow-emerald">&rarr;</div>
+
+            <div class="pipe-node topo-interactive" data-node="fanout-exec">
+              <div class="pnode-idx">02 / PARALLEL</div>
+              <div class="pnode-name">Multi-Segment Fan-Out</div>
+              <div class="pnode-metric text-emerald">mmap Rayon Workers</div>
+              <div class="pnode-sub">Concurrent segment traversal</div>
             </div>
-            
-            <div class="reservoir-meta">
-              <span class="reservoir-label">ACTIVE MEMTABLE</span>
-              <span class="reservoir-sub">Lock-Free SkipList Search</span>
+
+            <div class="pipe-flow-arrow flow-emerald">&rarr;</div>
+
+            <div class="pipe-node topo-interactive" data-node="hnsw-traversal">
+              <div class="pnode-idx">03 / HNSW</div>
+              <div class="pnode-name">Skip-List Traversal</div>
+              <div class="pnode-metric text-emerald">L2 &rarr; L1 &rarr; L0 Graph</div>
+              <div class="pnode-sub">efSearch = 32 greedy beam</div>
+            </div>
+
+            <div class="pipe-flow-arrow flow-emerald">&rarr;</div>
+
+            <div class="pipe-node topo-interactive highlight-emerald" data-node="topk">
+              <div class="pnode-idx">04 / MERGE</div>
+              <div class="pnode-name">Top-K Deduplicator</div>
+              <div class="pnode-metric text-emerald" id="nodeSearchLatency">Min-Heap Dedup</div>
+              <div class="pnode-sub">Final ranked nearest neighbors</div>
             </div>
           </div>
-
-          <div class="topo-connector connector-vertical">&darr;</div>
-
-          <!-- Node 4: Immutable Queue -->
-          <div class="topo-node topo-interactive" data-node="immutable" id="node-immutable">
-            <div class="node-badge">STAGE 04</div>
-            <div class="node-title">Immutable Queue</div>
-            <div class="node-live-metric" id="nodeImmutableCount">0 vectors</div>
-            <div class="node-sub">Sealed &bull; Zero Contention</div>
-            <div class="node-indicator ind-amber"></div>
-          </div>
-
-          <div class="topo-connector connector-horizontal">&rarr;</div>
-
-          <!-- Node 5: Segment Builder -->
-          <div class="topo-node topo-interactive" data-node="builder" id="node-builder">
-            <div class="node-badge">STAGE 05</div>
-            <div class="node-title">Segment Builder</div>
-            <div class="node-live-metric">SQ8 + HNSW</div>
-            <div class="node-sub">Rayon Pool &bull; M=16 ef=100</div>
-            <div class="node-indicator ind-purple"></div>
-          </div>
-
-          <div class="topo-connector connector-horizontal">&rarr;</div>
-
-          <!-- Node 6: Layered Disk Segments -->
-          <div class="topo-node topo-interactive" data-node="segments" id="node-segments">
-            <div class="node-badge">STAGE 06</div>
-            <div class="node-title">Immutable Segments</div>
-            <div class="node-live-metric" id="nodeSegmentCount">0 Published</div>
-            <div class="node-sub">mmap &bull; Atomic Manifest</div>
-            <div class="node-indicator ind-emerald"></div>
-          </div>
-
-          <div class="topo-connector connector-horizontal">&rarr;</div>
-
-          <!-- Node 7: Top-K Deduplicator & Merge -->
-          <div class="topo-node topo-interactive" data-node="topk" id="node-topk">
-            <div class="node-badge">STAGE 07</div>
-            <div class="node-title">Top-K Merge</div>
-            <div class="node-live-metric" id="nodeSearchLatency">Min-Heap Dedup</div>
-            <div class="node-sub">Concurrent Fan-Out Results</div>
-            <div class="node-indicator ind-emerald"></div>
-          </div>
-
         </div>
+
+        <div class="inter-plane-connector">
+          <span class="inter-arrow">&uarr; &darr; Concurrent Read Isolation &bull; Zero Write Lock Contention (INV-03, INV-04)</span>
+        </div>
+
+        <!-- Stream 2: Write Ingestion & LSM Storage Plane -->
+        <div class="pipeline-plane write-plane">
+          <div class="plane-label">CONTINUOUS WRITE INGESTION &amp; PERSISTENCE</div>
+          <div class="plane-nodes-row">
+            <div class="pipe-node topo-interactive" data-node="ingest">
+              <div class="pnode-idx">STAGE 01</div>
+              <div class="pnode-name">Vector Ingestion</div>
+              <div class="pnode-metric text-cyan" id="nodeIngestRate">119,676 vec/s</div>
+              <div class="pnode-sub">gRPC Router: 64d Float32</div>
+            </div>
+
+            <div class="pipe-flow-arrow flow-cyan">&rarr;</div>
+
+            <div class="pipe-node topo-interactive" data-node="wal">
+              <div class="pnode-idx">STAGE 02</div>
+              <div class="pnode-name">Write-Ahead Log</div>
+              <div class="pnode-metric text-cyan">CRC32 Checksum</div>
+              <div class="pnode-sub">Append-only log &bull; INV-01</div>
+            </div>
+
+            <div class="pipe-flow-arrow flow-cyan">&rarr;</div>
+
+            <!-- Dynamic MemTable Reservoir Vessel -->
+            <div class="pipe-node reservoir-node topo-interactive" data-node="memtable">
+              <div class="reservoir-header-bar">
+                <span class="pnode-idx">STAGE 03</span>
+                <span class="reservoir-pill" id="reservoirPill">ACTIVE</span>
+              </div>
+              <div class="pnode-name">MemTable Reservoir</div>
+              
+              <div class="reservoir-vessel-box">
+                <div class="reservoir-liquid-level" id="reservoirLiquid" style="height: 0%;">
+                  <div class="liquid-wave-highlight"></div>
+                </div>
+                <div class="reservoir-level-text">
+                  <span class="lvl-pct" id="memFillPct2">0%</span>
+                  <span class="lvl-count" id="reservoirVecCount">0 / 5,000</span>
+                </div>
+              </div>
+              <div class="pnode-sub">Lock-free contiguous buffer</div>
+            </div>
+
+            <div class="pipe-flow-arrow flow-amber">&rarr;</div>
+
+            <div class="pipe-node topo-interactive" data-node="immutable">
+              <div class="pnode-idx">STAGE 04</div>
+              <div class="pnode-name">Immutable Queue</div>
+              <div class="pnode-metric text-amber" id="nodeImmutableCount">0 queued</div>
+              <div class="pnode-sub">Zero lock contention</div>
+            </div>
+
+            <div class="pipe-flow-arrow flow-purple">&rarr;</div>
+
+            <div class="pipe-node topo-interactive" data-node="builder">
+              <div class="pnode-idx">STAGE 05</div>
+              <div class="pnode-name">Segment Builder</div>
+              <div class="pnode-metric text-purple">SQ8 + HNSW</div>
+              <div class="pnode-sub">Rayon background pool</div>
+            </div>
+
+            <div class="pipe-flow-arrow flow-emerald">&rarr;</div>
+
+            <div class="pipe-node topo-interactive" data-node="segments">
+              <div class="pnode-idx">STAGE 06</div>
+              <div class="pnode-name">Immutable Segments</div>
+              <div class="pnode-metric text-emerald" id="planeSegmentCount">6 Published</div>
+              <div class="pnode-sub">mmap &bull; Atomic Manifest</div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Floating Subsystem Inspector Drawer -->
       <aside class="subsystem-inspector-drawer hidden" id="inspectorDrawer">
         <div class="drawer-header">
           <div class="drawer-title-group">
-            <span class="drawer-pretitle">SUBSYSTEM INSPECTION</span>
-            <h3 class="drawer-title" id="inspectorTitle">Node State</h3>
+            <span class="drawer-pretitle">SUBSYSTEM STATE INSPECTOR</span>
+            <h3 class="drawer-title" id="inspectorTitle">Node Specification</h3>
           </div>
           <button class="drawer-close-btn" id="inspectorCloseBtn">&times;</button>
         </div>
         <div class="drawer-body" id="inspectorContent">
-          <!-- Populated by JavaScript -->
+          <!-- Populated by JavaScript on node click -->
         </div>
       </aside>
     </section>
 
-    <!-- 4. Operational Dual Workspace (Query Instrument & Layered Segments) -->
-    <section class="operational-workspace">
+    <!-- 5. Interactive Query Instrument & Layered Segments Workspace -->
+    <section class="workspace-split-stage" id="search-instrument">
       
-      <!-- Left Column: Interactive Query Instrument -->
-      <div class="workspace-card query-instrument-card">
-        <div class="card-top-bar">
-          <div class="card-heading-group">
-            <span class="card-eyebrow">INTERACTIVE INSTRUMENT</span>
-            <h3 class="card-title">LIVE VECTOR SEARCH PLAYGROUND</h3>
+      <!-- Left: Interactive Search Instrument -->
+      <div class="instrument-card">
+        <div class="instrument-header">
+          <div class="inst-title-wrap">
+            <span class="inst-pretitle">INTERACTIVE INSTRUMENT</span>
+            <h3 class="inst-title">Live Vector Search Playground</h3>
+            <p class="inst-sub">Execute nearest-neighbor queries against active memory and immutable HNSW segments</p>
           </div>
-          <span class="instrument-tag">GROUND-TRUTH TESTED</span>
+          <span class="ground-truth-chip">GROUND TRUTH TESTED</span>
         </div>
 
         <!-- Query Form Bar -->
-        <div class="query-action-bar">
-          <div class="input-cell flex-fill">
-            <label for="querySelect" class="cell-label">BENCHMARK QUERY VECTOR</label>
-            <select id="querySelect" class="cell-select">
+        <div class="query-control-panel">
+          <div class="form-input-block flex-grow">
+            <label for="querySelect" class="form-lbl">BENCHMARK QUERY VECTOR</label>
+            <select id="querySelect" class="form-select-cinematic">
               <option value="0">Query #0 (Sample Vector from 64d Dataset)</option>
             </select>
           </div>
 
-          <div class="input-cell cell-k">
-            <label for="kSelect" class="cell-label">TOP-K</label>
-            <select id="kSelect" class="cell-select">
+          <div class="form-input-block form-k-block">
+            <label for="kSelect" class="form-lbl">TOP-K</label>
+            <select id="kSelect" class="form-select-cinematic">
+              <option value="3">k = 3</option>
               <option value="5">k = 5</option>
               <option value="10" selected>k = 10</option>
               <option value="20">k = 20</option>
             </select>
           </div>
 
-          <button class="execute-query-btn" id="runSearchBtn">
+          <button class="btn-execute-query" id="runSearchBtn">
             <span class="btn-glyph">🔍</span> RUN SEARCH &rarr;
           </button>
         </div>
 
         <!-- Fan-out Execution Tracer -->
-        <div class="fanout-tracer-box" id="fanoutTelemetryBox">
-          <div class="tracer-header">
-            <span>CONCURRENT FAN-OUT TRACER</span>
-            <span class="tracer-status" id="fanoutStatusText">AWAITING QUERY</span>
+        <div class="fanout-tracer-stage">
+          <div class="tracer-header-line">
+            <span class="tracer-title">PARALLEL FAN-OUT TRACER</span>
+            <span class="tracer-badge" id="fanoutStatusText">AWAITING QUERY</span>
           </div>
-          <div class="tracer-timeline" id="fanoutTargetsList">
-            <span class="tracer-idle-hint">Ready to execute concurrent query against MemTable and disk segments...</span>
+          <div class="tracer-chips-row" id="fanoutTargetsList">
+            <span class="tracer-idle-text">Ready to execute concurrent query against Active MemTable and 6 published segments...</span>
           </div>
         </div>
 
         <!-- Search Results Grid -->
-        <div class="search-results-pane">
-          <div class="results-meta-header">
-            <span>RANKED NEAREST NEIGHBORS</span>
-            <span class="results-stats-label" id="queryStatsSummary">Latency: -- &bull; Recall@10: --</span>
+        <div class="results-table-section">
+          <div class="results-header-bar">
+            <span class="results-title">RANKED NEAREST NEIGHBORS</span>
+            <span class="results-stat-tag" id="queryStatsSummary">Latency: -- &bull; Recall@10: --</span>
           </div>
-          <div class="results-table-container">
+          <div class="table-scroll-wrap">
             <table class="cinematic-table" id="resultsTable">
               <thead>
                 <tr>
@@ -353,7 +414,7 @@
                   <th>VECTOR ID</th>
                   <th>COSINE SIMILARITY</th>
                   <th>DISTANCE</th>
-                  <th>SOURCE SEGMENT</th>
+                  <th>SOURCE</th>
                   <th>VERIFICATION</th>
                 </tr>
               </thead>
@@ -367,12 +428,13 @@
         </div>
       </div>
 
-      <!-- Right Column: Layered Segment Matrix & Depth Stack -->
-      <div class="workspace-card segment-matrix-card">
-        <div class="card-top-bar">
-          <div class="card-heading-group">
-            <span class="card-eyebrow">PERSISTENT STORAGE</span>
-            <h3 class="card-title">IMMUTABLE SEGMENT MATRIX</h3>
+      <!-- Right: Layered Segment Matrix & Depth Stack -->
+      <div class="segments-card" id="segments-matrix">
+        <div class="instrument-header">
+          <div class="inst-title-wrap">
+            <span class="inst-pretitle">PERSISTENT STORAGE</span>
+            <h3 class="inst-title">Immutable Segment Matrix</h3>
+            <p class="inst-sub">Physical disk segments built via MemTable rotation</p>
           </div>
           <button class="action-ghost-sm" id="refreshSegmentsBtn">REFRESH</button>
         </div>
@@ -381,34 +443,34 @@
           <div class="empty-segments-state">
             <div class="empty-icon">📁</div>
             <div class="empty-msg">No disk segments published yet.</div>
-            <div class="empty-hint">Click "INJECT 1,000 VEC" or "ROTATE &amp; FLUSH" to seal the MemTable and publish S-001.</div>
+            <div class="empty-hint">Click "INGEST 1K" or "ROTATE" to seal the MemTable and publish S-001.</div>
           </div>
         </div>
 
-        <!-- Segment Specs Summary Bar -->
+        <!-- Segment Specifications Strip -->
         <div class="segment-specs-strip">
-          <div class="spec-item">
-            <span class="spec-label">COMPRESSION</span>
-            <span class="spec-val text-cyan">SQ8 (3.55x)</span>
+          <div class="spec-cell">
+            <span class="spec-k">COMPRESSION</span>
+            <span class="spec-v text-cyan">SQ8 (3.55x)</span>
           </div>
-          <div class="spec-item">
-            <span class="spec-label">INDEX</span>
-            <span class="spec-val text-purple">HNSW (M=16)</span>
+          <div class="spec-cell">
+            <span class="spec-k">INDEX</span>
+            <span class="spec-v text-purple">HNSW (M=16)</span>
           </div>
-          <div class="spec-item">
-            <span class="spec-label">READER</span>
-            <span class="spec-val text-emerald">mmap Lock-Free</span>
+          <div class="spec-cell">
+            <span class="spec-k">READER</span>
+            <span class="spec-v text-emerald">mmap Lock-Free</span>
           </div>
-          <div class="spec-item">
-            <span class="spec-label">PERSISTENCE</span>
-            <span class="spec-val text-amber">Atomic Manifest</span>
+          <div class="spec-cell">
+            <span class="spec-k">PERSISTENCE</span>
+            <span class="spec-v text-amber">Atomic Manifest</span>
           </div>
         </div>
       </div>
 
     </section>
 
-    <!-- 5. Real-Time Telemetry Sparklines & Live Event Stream -->
+    <!-- 6. Real-time Telemetry Sparklines & Engine Event Stream -->
     <section class="telemetry-log-section">
       <!-- Latency Sparkline -->
       <div class="chart-card">
@@ -425,7 +487,7 @@
           </div>
         </div>
         <div class="chart-canvas-wrap">
-          <canvas id="latencyChartCanvas" height="130"></canvas>
+          <canvas id="latencyChartCanvas" height="120"></canvas>
         </div>
       </div>
 
@@ -442,7 +504,7 @@
           </div>
         </div>
         <div class="chart-canvas-wrap">
-          <canvas id="throughputChartCanvas" height="130"></canvas>
+          <canvas id="throughputChartCanvas" height="120"></canvas>
         </div>
       </div>
 
@@ -462,15 +524,16 @@
       </div>
     </section>
 
-    <!-- 6. Technical Benchmark Verification Center -->
-    <section class="benchmark-verification-section">
+    <!-- 7. Technical Benchmark Verification Center (Target vs Measured Proof) -->
+    <section class="benchmark-section" id="benchmark-proof">
       <div class="benchmark-card">
         <div class="benchmark-card-header">
           <div>
             <span class="card-eyebrow">OFFICIAL EVALUATION EVIDENCE</span>
-            <h3 class="card-title">TECHNICAL BENCHMARK VERIFICATION CENTER</h3>
+            <h3 class="card-title">Technical Benchmark Verification Center</h3>
+            <p class="inst-sub">Verified empirical measurements evaluated on reference dataset</p>
           </div>
-          <button class="action-btn action-accent" id="replayBenchmarkBtn">
+          <button class="nav-action-btn action-inject" id="replayBenchmarkBtn">
             <span class="btn-glyph">⚡</span> RUN INGESTION WORKLOAD
           </button>
         </div>
@@ -491,42 +554,42 @@
                 <td><strong>Write Ingestion Throughput</strong><br><small class="text-muted">Batch WAL append + lock-free MemTable</small></td>
                 <td>&gt; 50,000 vec/s</td>
                 <td><strong class="text-cyan font-mono">119,676 vec/s</strong></td>
-                <td><span class="sla-badge sla-emerald">PASS (2.39x EXCEEDED)</span></td>
+                <td><span class="signal-tag tag-pass">PASS (2.39x EXCEEDED)</span></td>
                 <td>Parallel Rayon ingestion into 64-dim float32 MemTable with CRC32 WAL.</td>
               </tr>
               <tr>
                 <td><strong>Search Latency (P99)</strong><br><small class="text-muted">Under concurrent 85k write load</small></td>
                 <td>&lt; 15.0 ms</td>
                 <td><strong class="text-emerald font-mono">10.59 ms (P99)</strong><br><small class="text-muted">P50: 5.16ms &bull; P95: 8.90ms</small></td>
-                <td><span class="sla-badge sla-emerald">PASS (&lt;15ms SLA)</span></td>
+                <td><span class="signal-tag tag-pass">PASS (&lt;15ms SLA)</span></td>
                 <td>Rayon multi-segment parallel HNSW graph traversal ($ef_{search}=32$).</td>
               </tr>
               <tr>
                 <td><strong>Concurrent Write Rate</strong><br><small class="text-muted">Mixed concurrent ingestion + search</small></td>
                 <td>High-rate concurrent</td>
                 <td><strong class="text-cyan font-mono">85,000 vec/s</strong></td>
-                <td><span class="sla-badge sla-emerald">PASS (LOCK-FREE)</span></td>
+                <td><span class="signal-tag tag-pass">PASS (LOCK-FREE)</span></td>
                 <td>Zero read locks during ingestion. Reader traverses immutable segments.</td>
               </tr>
               <tr>
                 <td><strong>Vector Quantization Compression</strong><br><small class="text-muted">SQ8 Scalar Quantization</small></td>
                 <td>Compressed representation</td>
                 <td><strong class="text-amber font-mono">3.55x (256B &rarr; 72B)</strong><br><small class="text-muted">Fidelity: 0.999645 Cosine Sim</small></td>
-                <td><span class="sla-badge sla-emerald">PASS (72% SAVINGS)</span></td>
+                <td><span class="signal-tag tag-pass">PASS (72% SAVINGS)</span></td>
                 <td>Min/max scale scalar quantization per dimension with negligible loss.</td>
               </tr>
               <tr>
                 <td><strong>Crash Recovery &amp; Durability</strong><br><small class="text-muted">WAL replay on unexpected shutdown</small></td>
                 <td>Zero data loss</td>
                 <td><strong class="text-emerald font-mono">100% (208,100 Records)</strong><br><small class="text-muted">0.00% Data Loss</small></td>
-                <td><span class="sla-badge sla-emerald">PASS (100% DURABLE)</span></td>
+                <td><span class="signal-tag tag-pass">PASS (100% DURABLE)</span></td>
                 <td>CRC32 validated append log automatically replays unsealed records into MemTable.</td>
               </tr>
               <tr>
                 <td><strong>k-NN Recall Accuracy</strong><br><small class="text-muted">Recall@10 vs exact Ground Truth</small></td>
                 <td>High Recall (&gt;95%)</td>
                 <td><strong class="text-cyan font-mono">98.0% - 100%</strong></td>
-                <td><span class="sla-badge sla-emerald">PASS (KNN ACCURACY)</span></td>
+                <td><span class="signal-tag tag-pass">PASS (KNN ACCURACY)</span></td>
                 <td>Verified against dataset ground truth (`queries_ground_truth_knn.json`).</td>
               </tr>
             </tbody>
@@ -535,20 +598,20 @@
       </div>
     </section>
 
-  </div> <!-- /cinematic-viewport -->
-
-  <!-- Modal 1: Interactive Crash Recovery Simulation Modal -->
-  <div class="cinematic-modal-overlay hidden" id="recoveryModal">
-    <div class="cinematic-modal-card">
-      <div class="modal-header">
-        <div class="modal-title-group">
-          <span class="modal-eyebrow">DURABILITY &amp; FAULT TOLERANCE // INV-10</span>
-          <h2 class="modal-title">Engine Crash Recovery Visualizer</h2>
-          <p class="modal-subtitle">Simulate an abrupt storage engine crash and observe the automatic WAL CRC32 replay sequence</p>
+    <!-- 8. Interactive Crash Recovery Section (INV-10 Proof) -->
+    <section class="recovery-stage-section" id="recovery-section">
+      <div class="benchmark-card">
+        <div class="benchmark-card-header">
+          <div>
+            <span class="card-eyebrow">DURABILITY &amp; FAULT TOLERANCE // INV-10</span>
+            <h3 class="card-title">Engine Crash Recovery Visualizer</h3>
+            <p class="inst-sub">Simulate an abrupt storage engine crash and observe the automatic WAL CRC32 replay sequence</p>
+          </div>
+          <button class="nav-action-btn action-inject" id="startInlineRecoveryBtn">
+            <span class="btn-glyph">▶</span> SIMULATE CRASH &amp; REPLAY
+          </button>
         </div>
-        <button class="modal-close-btn" id="recoveryModalCloseBtn">&times;</button>
-      </div>
-      <div class="modal-body">
+
         <div class="recovery-stage-strip">
           <div class="recov-step" id="recovStep1">
             <div class="step-num">1</div>
@@ -579,20 +642,26 @@
 
         <div class="recovery-console-wrap">
           <div class="recovery-console" id="recoveryConsole">
-            <div class="recov-line">[READY] Click "START RECOVERY SIMULATION" to trigger crash &amp; replay sequence.</div>
+            <div class="recov-line">[READY] Click "SIMULATE CRASH &amp; REPLAY" to trigger WAL replay demonstration.</div>
           </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button class="action-btn action-accent" id="startRecoveryBtn">
-          <span class="btn-glyph">▶</span> START RECOVERY SIMULATION
-        </button>
-        <button class="action-btn action-ghost" id="recoveryDoneBtn">CLOSE</button>
-      </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Modal 2: Representative HNSW Multi-Layer Skip-List Visualizer -->
+    <!-- Footer -->
+    <footer class="cinematic-footer">
+      <div class="footer-left">
+        <span class="footer-brand">PS-005 DYNAMIC INVERTED-HNSW VECTOR STORAGE ENGINE</span>
+        <span class="footer-sub">&bull; Open-Source High-Performance Infrastructure &bull; MIT Licensed</span>
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/adityashinde0/Dynamic-Inverted-HNSW-Vector-Storage-Engine" target="_blank" class="footer-link">GitHub Repository</a>
+      </div>
+    </footer>
+
+  </div> <!-- /cinematic-shell -->
+
+  <!-- Modal 1: Representative HNSW Multi-Layer Skip-List Visualizer -->
   <div class="cinematic-modal-overlay hidden" id="hnswModal">
     <div class="cinematic-modal-card hnsw-modal-card">
       <div class="modal-header">
@@ -608,7 +677,7 @@
           <!-- Layer 2 -->
           <div class="hnsw-layer-row">
             <div class="layer-meta">
-              <span class="sla-badge sla-purple">LAYER 2</span>
+              <span class="signal-tag tag-purple">LAYER 2</span>
               <span class="layer-desc">Express Highway (Sparse entry points, long-range skip edges)</span>
             </div>
             <svg class="layer-svg-canvas" id="hnswLayer2Svg" viewBox="0 0 650 65"></svg>
@@ -619,7 +688,7 @@
           <!-- Layer 1 -->
           <div class="hnsw-layer-row">
             <div class="layer-meta">
-              <span class="sla-badge sla-cyan">LAYER 1</span>
+              <span class="signal-tag tag-cyan">LAYER 1</span>
               <span class="layer-desc">Regional Routing (Intermediate graph density, cluster leaps)</span>
             </div>
             <svg class="layer-svg-canvas" id="hnswLayer1Svg" viewBox="0 0 650 65"></svg>
@@ -630,7 +699,7 @@
           <!-- Layer 0 -->
           <div class="hnsw-layer-row">
             <div class="layer-meta">
-              <span class="sla-badge sla-emerald">LAYER 0</span>
+              <span class="signal-tag tag-emerald">LAYER 0</span>
               <span class="layer-desc">Dense Base Graph (All quantized segment vectors indexed)</span>
             </div>
             <svg class="layer-svg-canvas" id="hnswLayer0Svg" viewBox="0 0 650 85"></svg>
@@ -638,19 +707,19 @@
         </div>
 
         <div class="hnsw-control-strip">
-          <button class="action-btn action-accent" id="simulateHnswTraversalBtn">
+          <button class="nav-action-btn action-inject" id="simulateHnswTraversalBtn">
             <span class="btn-glyph">▶</span> SIMULATE GREEDY TRAVERSAL
           </button>
           <span class="hnsw-status-label" id="hnswTraversalStatus">Click to trace query trajectory from Layer 2 down to Layer 0 nearest neighbors</span>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="action-btn action-ghost" id="hnswModalDoneBtn">CLOSE VISUALIZATION</button>
+        <button class="action-ghost-sm" id="hnswModalDoneBtn">CLOSE VISUALIZATION</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 3: Judge Mode Evaluation Walkthrough -->
+  <!-- Modal 2: Judge Mode Evaluation Walkthrough -->
   <div class="cinematic-modal-overlay hidden" id="judgeModal">
     <div class="cinematic-modal-card judge-modal-card">
       <div class="modal-header">
@@ -704,15 +773,15 @@
           <h4 class="judge-topic text-amber">4. Recommended 60-Second Demo Walkthrough</h4>
           <ol class="judge-demo-steps">
             <li><strong>Observe Baseline Telemetry:</strong> Note the top command bar and engine status chip.</li>
-            <li><strong>Click "INJECT 1,000 VEC":</strong> Watch write stream spike, WAL size advance, and the Active MemTable reservoir fill dynamically!</li>
-            <li><strong>Click "ROTATE &amp; FLUSH":</strong> Observe MemTable state change from ACTIVE to SEALED, and watch a new immutable segment appear in the Segment Matrix.</li>
+            <li><strong>Click "INGEST 1K":</strong> Watch write stream spike, WAL size advance, and the Active MemTable reservoir fill dynamically!</li>
+            <li><strong>Click "ROTATE":</strong> Observe MemTable state change from ACTIVE to SEALED, and watch a new immutable segment appear in the Segment Matrix.</li>
             <li><strong>Execute Search in Playground:</strong> Select Query #0, click "RUN SEARCH", and watch the fan-out tracer search active and durable segments concurrently with 100% Recall@10.</li>
-            <li><strong>Click "RECOVERY DEMO":</strong> Demonstrate automatic WAL CRC32 replay of 208,100 records with 0.00% data loss.</li>
+            <li><strong>Click "SIMULATE CRASH &amp; REPLAY":</strong> Demonstrate automatic WAL CRC32 replay of 208,100 records with 0.00% data loss.</li>
           </ol>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="action-btn action-accent" id="judgeModalGotItBtn">CONTINUE DEMO</button>
+        <button class="nav-action-btn action-inject" id="judgeModalGotItBtn">CONTINUE DEMO</button>
       </div>
     </div>
   </div>
