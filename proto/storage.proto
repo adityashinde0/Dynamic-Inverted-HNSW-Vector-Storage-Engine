@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+package storage;
+
+option go_package = "ps005/router/proto;storagepb";
+
+service VectorStorage {
+  rpc PutVector (PutVectorRequest) returns (PutVectorResponse);
+  rpc PutVectors (PutVectorsRequest) returns (PutVectorsResponse);
+  rpc Search (SearchRequest) returns (SearchResponse);
+  rpc GetStats (StatsRequest) returns (StatsResponse);
+  rpc Flush (FlushRequest) returns (FlushResponse);
+  rpc Health (HealthRequest) returns (HealthResponse);
+}
+
+message VectorItem {
+  uint64 id = 1;
+  repeated float values = 2;
+}
+
+message PutVectorRequest {
+  uint64 id = 1;
+  repeated float values = 2;
+}
+
+message PutVectorResponse {
+  bool success = 1;
+  uint64 sequence_number = 2;
+  string error = 3;
+}
+
+message PutVectorsRequest {
+  repeated VectorItem vectors = 1;
+}
+
+message PutVectorsResponse {
+  bool success = 1;
+  uint64 count = 2;
+  uint64 last_sequence_number = 3;
+  string error = 4;
+}
+
+message SearchRequest {
+  repeated float query_vector = 1;
+  uint32 k = 2;
+  uint32 ef_search = 3;
+}
+
+message SearchNeighbor {
+  uint64 id = 1;
+  float score = 2; // Cosine similarity
+  float distance = 3; // 1.0 - cosine_similarity
+}
+
+message SearchResponse {
+  repeated SearchNeighbor neighbors = 1;
+  uint64 latency_micros = 2;
+}
+
+message StatsRequest {}
+
+message StatsResponse {
+  uint64 total_writes = 1;
+  uint64 active_memtable_vectors = 2;
+  uint64 immutable_memtable_vectors = 3;
+  uint64 segment_count = 4;
+  uint64 total_segment_vectors = 5;
+  uint64 wal_size_bytes = 6;
+  uint64 total_queries = 7;
+  double p50_latency_ms = 8;
+  double p95_latency_ms = 9;
+  double p99_latency_ms = 10;
+  double write_qps = 11;
+  double query_qps = 12;
+  bool recovering = 13;
+}
+
+message FlushRequest {}
+
+message FlushResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  uint64 uptime_seconds = 2;
+}
