@@ -1,0 +1,12 @@
+// =============================================================
+// PS-005 — MAIN STYLESHEET
+// Vector storage engine — engineering-plate design system.
+// Compiled with dart-sass to ../dist/main.css
+// =============================================================
+
+@use 'tokens';
+@use 'base';
+@use 'titleblock';
+@use 'layout';
+@use 'diagram';
+@use 'components';
