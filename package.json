@@ -4,9 +4,7 @@
   "private": true,
   "description": "PS-005: Dynamic Inverted-HNSW Vector Storage Engine with High-Throughput Write Ingestion",
   "scripts": {
-    "dev": "npm --prefix frontend run dev",
-    "build": "npm --prefix frontend run build",
-    "typecheck": "npm --prefix frontend run typecheck",
-    "preview": "npm --prefix frontend run preview"
+    "start": "powershell -ExecutionPolicy Bypass -File ./start_demo.ps1",
+    "test": "powershell -ExecutionPolicy Bypass -File ./run_tests.ps1"
   }
 }
