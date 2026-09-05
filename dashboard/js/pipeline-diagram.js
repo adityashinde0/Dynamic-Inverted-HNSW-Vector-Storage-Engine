@@ -40,20 +40,31 @@ export function initPipelineDiagram(canvas) {
   resize();
   window.addEventListener('resize', resize);
 
-  // ---- layout: normalized coordinates (0..1) scaled to W/H ----
+  // ---- layout: normalized coordinates (0..1) with safe inset bounds ----
   const nodes = {
-    client:   { x: 0.06, y: 0.5,  label: 'client write' },
-    wal:      { x: 0.24, y: 0.24, label: 'WAL', sub: 'durable log' },
-    memtable: { x: 0.24, y: 0.62, label: 'MemTable', sub: 'in-memory, sorted' },
-    seg1:     { x: 0.52, y: 0.5,  label: 'segment', sub: 'quantized + HNSW' },
-    seg2:     { x: 0.52, y: 0.78, label: 'segment' },
-    seg3:     { x: 0.52, y: 0.92, label: 'segment' },
-    merge:    { x: 0.72, y: 0.7,  label: 'compaction', sub: 'background merge' },
-    router:   { x: 0.88, y: 0.3,  label: 'query router', sub: 'Go / gRPC' },
-    topk:     { x: 1.0,  y: 0.3,  label: 'top-k' },
+    client:   { x: 0.00, y: 0.48, label: 'client write' },
+    wal:      { x: 0.22, y: 0.12, label: 'WAL', sub: 'durable log' },
+    memtable: { x: 0.22, y: 0.60, label: 'MemTable', sub: 'in-memory, sorted' },
+    seg1:     { x: 0.50, y: 0.42, label: 'segment', sub: 'quantized + HNSW' },
+    seg2:     { x: 0.50, y: 0.68, label: 'segment' },
+    seg3:     { x: 0.50, y: 0.90, label: 'segment' },
+    merge:    { x: 0.72, y: 0.66, label: 'compaction', sub: 'background merge' },
+    router:   { x: 0.83, y: 0.22, label: 'query router', sub: 'Go / gRPC' },
+    topk:     { x: 0.98, y: 0.22, label: 'top-k' },
   };
 
-  function P(n) { return { x: n.x * W, y: n.y * H }; }
+  function P(n) {
+    // Dynamic inset padding: guarantees all boxes and labels stay cleanly inside the border
+    const padX = Math.max(64, W * 0.07);
+    const padTop = 48;
+    const padBottom = 42;
+    const usableW = Math.max(W - padX * 2, 80);
+    const usableH = Math.max(H - padTop - padBottom, 80);
+    return {
+      x: padX + n.x * usableW,
+      y: padTop + n.y * usableH
+    };
+  }
 
   // moving particles along paths: {from,to,progress,speed,color,kind}
   let particles = [];
@@ -89,7 +100,8 @@ export function initPipelineDiagram(canvas) {
 
   function drawNode(n, opts = {}) {
     const p = P(n);
-    const w = opts.w || 92, h = opts.h || 44;
+    // Slightly more compact proportions to easily fit within the plate frame
+    const w = opts.w || 82, h = opts.h || 38;
     ctx.save();
     ctx.strokeStyle = opts.active ? colors.brass : colors.lineStrong;
     ctx.lineWidth = 1;
@@ -99,14 +111,14 @@ export function initPipelineDiagram(canvas) {
     ctx.fill(); ctx.stroke();
 
     ctx.fillStyle = colors.paper;
-    ctx.font = '11px "IBM Plex Mono", monospace';
+    ctx.font = '10px "IBM Plex Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(n.label, p.x, p.y - (n.sub ? 6 : 0));
+    ctx.fillText(n.label, p.x, p.y - (n.sub ? 5 : 0));
     if (n.sub) {
       ctx.fillStyle = colors.paperDim;
-      ctx.font = '9px "IBM Plex Mono", monospace';
-      ctx.fillText(n.sub, p.x, p.y + 10);
+      ctx.font = '8px "IBM Plex Mono", monospace';
+      ctx.fillText(n.sub, p.x, p.y + 8);
     }
     ctx.restore();
   }

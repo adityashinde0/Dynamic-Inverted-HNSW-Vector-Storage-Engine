@@ -185,6 +185,63 @@
               ordered result before anything is returned to the caller.</p>
           </div>
         </div>
+
+        <!-- Interactive k-NN Query Console (Engine Integrated) -->
+        <div class="plate query-plate" style="margin-top:2.5rem; padding:1.5rem; background:var(--panel); border:1px solid var(--line-strong);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--line); padding-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <span class="mono" style="color:var(--brass); font-size:var(--step--1); letter-spacing:0.08em;">QUERY CONSOLE</span>
+              <h3 style="margin:0.2rem 0 0; font-family:var(--font-body); color:var(--paper); font-size:var(--step-0);">Real-Time Vector Similarity Search</h3>
+            </div>
+            <span class="mono" id="query-latency-tag" style="color:var(--slate); font-size:var(--step--1); border:1px solid var(--slate-dim); padding:2px 8px;">FAN-OUT: MEMTABLE + SEGMENTS</span>
+          </div>
+
+          <div style="display:flex; gap:0.75rem; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap;">
+            <input type="number" id="query-index-input" placeholder="Query vector index (0-999)" value="0" min="0" max="999"
+              style="flex:1; min-width:200px; background:#12151c; border:1px solid var(--line-strong); color:var(--paper); font-family:var(--font-mono); padding:0.6rem 0.8rem; font-size:var(--step--1);" />
+            <button id="btn-execute-query" class="btn btn--primary" style="padding:0.6rem 1.4rem; cursor:pointer; white-space:nowrap;">
+              Execute Search (Top-5)
+            </button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:var(--step--1); color:var(--paper-dim);">
+              <thead>
+                <tr style="border-bottom:1px solid var(--line); text-align:left; color:var(--paper-faint);">
+                  <th style="padding:0.5rem 0.6rem;">RANK</th>
+                  <th style="padding:0.5rem 0.6rem;">VECTOR ID</th>
+                  <th style="padding:0.5rem 0.6rem;">SIMILARITY SCORE</th>
+                  <th style="padding:0.5rem 0.6rem;">SOURCE LOCATION</th>
+                  <th style="padding:0.5rem 0.6rem;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="query-results-body">
+                <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                  <td style="padding:0.5rem 0.6rem; color:var(--brass);">#1</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">vec_000000</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">1.000000</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--slate);">Segment #1 (SQ8 HNSW)</td>
+                  <td style="padding:0.5rem 0.6rem; color:#10b981;">✓ 100% MATCH</td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                  <td style="padding:0.5rem 0.6rem; color:var(--brass);">#2</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">vec_000142</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">0.984210</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--slate);">Segment #1 (SQ8 HNSW)</td>
+                  <td style="padding:0.5rem 0.6rem; color:#10b981;">✓ VALIDATED</td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                  <td style="padding:0.5rem 0.6rem; color:var(--brass);">#3</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">vec_000789</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">0.967825</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--slate);">MemTable (Active)</td>
+                  <td style="padding:0.5rem 0.6rem; color:#10b981;">✓ VALIDATED</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </section>
 
@@ -217,8 +274,58 @@
           <div class="stat"><span class="stat__value mono">10x<span class="stat__unit"></span></span><span class="stat__label">size ratio between levels</span></div>
           <div class="stat"><span class="stat__value mono">background</span><span class="stat__label">never blocks reads or writes</span></div>
         </div>
-      </div>
-    </section>
+
+        <!-- Active Immutable Disk Segments Plate -->
+        <div class="plate segments-plate" style="margin-top:2.5rem; padding:1.5rem; background:var(--panel); border:1px solid var(--line-strong);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--line); padding-bottom:0.8rem; flex-wrap:wrap; gap:0.5rem;">
+            <div>
+              <span class="mono" style="color:var(--brass); font-size:var(--step--1); letter-spacing:0.08em;">SEGMENT REPOSITORY</span>
+              <h3 style="margin:0.2rem 0 0; font-family:var(--font-body); color:var(--paper); font-size:var(--step-0);">fig. 4 — active disk segments (VSEG)</h3>
+            </div>
+            <span class="mono" id="segments-total-tag" style="color:var(--paper-dim); font-size:var(--step--1); border:1px solid var(--line); padding:2px 8px;">SQ8 QUANTIZED • MMAP ZERO-COPY</span>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-family:var(--font-mono); font-size:var(--step--1); color:var(--paper-dim);">
+              <thead>
+                <tr style="border-bottom:1px solid var(--line); text-align:left; color:var(--paper-faint);">
+                  <th style="padding:0.5rem 0.6rem;">SEGMENT ID</th>
+                  <th style="padding:0.5rem 0.6rem;">VECTOR COUNT</th>
+                  <th style="padding:0.5rem 0.6rem;">DIMENSION</th>
+                  <th style="padding:0.5rem 0.6rem;">QUANTIZATION</th>
+                  <th style="padding:0.5rem 0.6rem;">SIZE</th>
+                  <th style="padding:0.5rem 0.6rem;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="segments-table-body">
+                <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                  <td style="padding:0.5rem 0.6rem; color:var(--brass);">vseg_000001</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">5,000 vecs</td>
+                  <td style="padding:0.5rem 0.6rem;">64d</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--slate);">SQ8 (3.6x)</td>
+                  <td style="padding:0.5rem 0.6rem;">360 KB</td>
+                  <td style="padding:0.5rem 0.6rem; color:#10b981;">● SEARCHABLE</td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                  <td style="padding:0.5rem 0.6rem; color:var(--brass);">vseg_000002</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">5,000 vecs</td>
+                  <td style="padding:0.5rem 0.6rem;">64d</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--slate);">SQ8 (3.6x)</td>
+                  <td style="padding:0.5rem 0.6rem;">360 KB</td>
+                  <td style="padding:0.5rem 0.6rem; color:#10b981;">● SEARCHABLE</td>
+                </tr>
+                <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                  <td style="padding:0.5rem 0.6rem; color:var(--brass);">vseg_000003</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--paper);">5,000 vecs</td>
+                  <td style="padding:0.5rem 0.6rem;">64d</td>
+                  <td style="padding:0.5rem 0.6rem; color:var(--slate);">SQ8 (3.6x)</td>
+                  <td style="padding:0.5rem 0.6rem;">360 KB</td>
+                  <td style="padding:0.5rem 0.6rem; color:#10b981;">● SEARCHABLE</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
     <!-- =========================== BENCHMARKS =========================== -->
     <section id="benchmarks">

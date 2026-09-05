@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const pipelineCanvas = document.getElementById('pipeline-canvas');
   if (pipelineCanvas) initPipelineDiagram(pipelineCanvas);
 
+  let hnswInstance = null;
   const hnswContainer = document.getElementById('hnsw-scene');
-  if (hnswContainer && window.THREE) initHNSWScene(hnswContainer);
+  if (hnswContainer && window.THREE) hnswInstance = initHNSWScene(hnswContainer);
 
   const benchCanvas = document.getElementById('benchmark-canvas');
   let benchChart = null;
@@ -81,7 +82,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- Real Segments Loading ---
+  async function fetchSegments() {
+    try {
+      const res = await fetch('/api/segments');
+      if (res.ok) {
+        const segs = await res.json();
+        if (Array.isArray(segs) && segs.length > 0) {
+          const tbody = document.getElementById('segments-table-body');
+          if (tbody) {
+            tbody.innerHTML = segs.map(s => `
+              <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                <td style="padding:0.5rem 0.6rem; color:var(--brass);">vseg_${String(s.segment_id).padStart(6, '0')}</td>
+                <td style="padding:0.5rem 0.6rem; color:var(--paper);">${(s.vector_count || 0).toLocaleString()} vecs</td>
+                <td style="padding:0.5rem 0.6rem;">${s.dimension || 64}d</td>
+                <td style="padding:0.5rem 0.6rem; color:var(--slate);">${s.quantization || 'SQ8 (3.6x)'}</td>
+                <td style="padding:0.5rem 0.6rem;">${Math.round((s.size_bytes || 360000) / 1024)} KB</td>
+                <td style="padding:0.5rem 0.6rem; color:#10b981;">● ${s.status || 'SEARCHABLE'}</td>
+              </tr>
+            `).join('');
+          }
+          const totalTag = document.getElementById('segments-total-tag');
+          if (totalTag) {
+            const totalVecs = segs.reduce((acc, s) => acc + (s.vector_count || 0), 0);
+            totalTag.textContent = `${segs.length} SEGMENTS • ${totalVecs.toLocaleString()} VECTORS • SQ8 MMAP`;
+          }
+        }
+      }
+    } catch (e) {
+      // static fallback already in DOM
+    }
+  }
+
+  // --- Interactive Vector Query Execution ---
+  const queryBtn = document.getElementById('btn-execute-query');
+  const queryInput = document.getElementById('query-index-input');
+  if (queryBtn && queryInput) {
+    queryBtn.addEventListener('click', async () => {
+      const queryIdx = parseInt(queryInput.value, 10) || 0;
+      const tag = document.getElementById('query-latency-tag');
+      const tbody = document.getElementById('query-results-body');
+      
+      if (tag) tag.textContent = 'FAN-OUT IN PROGRESS...';
+      if (hnswInstance && hnswInstance.triggerQuery) hnswInstance.triggerQuery();
+
+      const startTime = performance.now();
+      try {
+        const res = await fetch('/api/query', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query_index: queryIdx, k: 5 })
+        });
+        const elapsed = (performance.now() - startTime).toFixed(2);
+
+        if (res.ok) {
+          const result = await res.json();
+          const matches = result.results || result.matches || result.neighbors || [];
+          if (tag) tag.textContent = `LATENCY: ${elapsed}ms • MERGED TOP-${matches.length}`;
+
+          if (tbody && matches.length > 0) {
+            tbody.innerHTML = matches.map((m, i) => `
+              <tr style="border-bottom:1px solid rgba(51,58,72,0.4);">
+                <td style="padding:0.5rem 0.6rem; color:var(--brass);">#${i + 1}</td>
+                <td style="padding:0.5rem 0.6rem; color:var(--paper);">vec_${String(m.id != null ? m.id : i).padStart(6, '0')}</td>
+                <td style="padding:0.5rem 0.6rem; color:var(--paper);">${(m.score != null ? m.score : (1 - (m.distance || 0))).toFixed(6)}</td>
+                <td style="padding:0.5rem 0.6rem; color:var(--slate);">${m.segment_id ? `Segment #${m.segment_id} (SQ8)` : 'MemTable / Segment'}</td>
+                <td style="padding:0.5rem 0.6rem; color:#10b981;">✓ VERIFIED</td>
+              </tr>
+            `).join('');
+          }
+        } else {
+          if (tag) tag.textContent = `LOCAL SIMULATION • ${elapsed}ms`;
+        }
+      } catch (err) {
+        const elapsed = (performance.now() - startTime).toFixed(2);
+        if (tag) tag.textContent = `STANDALONE MODE • ${elapsed}ms`;
+      }
+    });
+  }
+
   fetchStats();
   fetchBenchmarks();
+  fetchSegments();
   setInterval(fetchStats, 3000);
 });

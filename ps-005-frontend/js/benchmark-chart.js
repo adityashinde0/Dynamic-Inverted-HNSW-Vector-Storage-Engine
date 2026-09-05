@@ -6,15 +6,15 @@
  * not a decorative graphic.
  * -------------------------------------------------------------
  */
-export function initBenchmarkChart(canvas) {
+export function initBenchmarkChart(canvas, initialData) {
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  const data = [
-    { label: 'p50', ms: 1.8 },
-    { label: 'p90', ms: 4.1 },
-    { label: 'p99', ms: 9.6 },
-    { label: 'p99.9', ms: 21.4 },
+  let data = initialData || [
+    { label: 'p50', ms: 5.2 },
+    { label: 'p90', ms: 8.9 },
+    { label: 'p99', ms: 10.6 },
+    { label: 'p99.9', ms: 14.8 },
   ];
 
   function resize() {
@@ -82,5 +82,13 @@ export function initBenchmarkChart(canvas) {
 
   resize();
   window.addEventListener('resize', resize);
-  return { destroy() { window.removeEventListener('resize', resize); } };
+  return {
+    update(newData) {
+      if (Array.isArray(newData) && newData.length > 0) {
+        data = newData;
+        draw(canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+      }
+    },
+    destroy() { window.removeEventListener('resize', resize); }
+  };
 }

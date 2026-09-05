@@ -161,6 +161,7 @@ export function initHNSWScene(container) {
   window.addEventListener('resize', onResize);
 
   return {
+    triggerQuery,
     destroy() {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
