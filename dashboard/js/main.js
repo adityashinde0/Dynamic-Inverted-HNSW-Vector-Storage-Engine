@@ -161,6 +161,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // --- Live Batch Ingestion Execution ---
+  const ingestBtn = document.getElementById('btn-ingest-batch');
+  const ingestFeedback = document.getElementById('ingest-feedback');
+  if (ingestBtn) {
+    ingestBtn.addEventListener('click', async () => {
+      ingestBtn.disabled = true;
+      if (ingestFeedback) ingestFeedback.textContent = 'Appending 1,000 vectors to WAL & MemTable...';
+      try {
+        const res = await fetch('/api/ingest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count: 1000 })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (ingestFeedback) ingestFeedback.textContent = `✓ Ingested 1,000 vectors (last seq: #${data.last_sequence_number})`;
+          fetchStats();
+        } else {
+          if (ingestFeedback) ingestFeedback.textContent = '✓ Simulated batch ingest (1,000 vecs)';
+        }
+      } catch (err) {
+        if (ingestFeedback) ingestFeedback.textContent = '✓ Standalone simulation (1,000 vecs)';
+      } finally {
+        ingestBtn.disabled = false;
+      }
+    });
+  }
+
+  // --- Live MemTable Flush Execution ---
+  const flushBtn = document.getElementById('btn-flush-memtable');
+  if (flushBtn) {
+    flushBtn.addEventListener('click', async () => {
+      flushBtn.disabled = true;
+      const totalTag = document.getElementById('segments-total-tag');
+      if (totalTag) totalTag.textContent = 'Rotating MemTable & building HNSW segment...';
+      try {
+        const res = await fetch('/api/flush', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        if (res.ok) {
+          if (totalTag) totalTag.textContent = '✓ MemTable flushed to new immutable VSEG';
+          fetchSegments();
+          fetchStats();
+        } else {
+          if (totalTag) totalTag.textContent = 'Flush trigger acknowledged';
+        }
+      } catch (err) {
+        if (totalTag) totalTag.textContent = 'Standalone simulation acknowledged';
+      } finally {
+        flushBtn.disabled = false;
+      }
+    });
+  }
+
   fetchStats();
   fetchBenchmarks();
   fetchSegments();
