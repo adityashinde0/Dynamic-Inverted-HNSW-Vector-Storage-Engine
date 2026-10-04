@@ -1,4 +1,4 @@
-﻿Write-Host "==================================================================" -ForegroundColor Cyan
+Write-Host "==================================================================" -ForegroundColor Cyan
 Write-Host " PS-005 Vector Storage Engine — Complete End-to-End Test Suite" -ForegroundColor Cyan
 Write-Host "==================================================================" -ForegroundColor Cyan
 Write-Host ""
@@ -8,7 +8,15 @@ Write-Host ""
 # -------------------------------------------------------------
 Write-Host "[STEP 1/3] Testing Go Query Router (router.exe)..." -ForegroundColor Yellow
 
-$proc = Start-Process -FilePath ".\router\router.exe" -PassThru
+$routerExe = Join-Path $PSScriptRoot "router\router.exe"
+if (-not (Test-Path $routerExe)) {
+    Write-Host "  -> Compiling router.exe from Go source..." -ForegroundColor Cyan
+    Push-Location (Join-Path $PSScriptRoot "router")
+    go build -o router.exe .
+    Pop-Location
+}
+
+$proc = Start-Process -FilePath $routerExe -PassThru
 Start-Sleep -Milliseconds 600
 
 try {
@@ -50,7 +58,9 @@ try {
 Write-Host "[STEP 2/3] Running Technical Benchmark Suite in Release Mode..." -ForegroundColor Yellow
 Write-Host "  (Measuring Ingestion Throughput, P99 Latency, Recall@10, and Crash Recovery)`n" -ForegroundColor DarkGray
 
-wsl -d Ubuntu -e /bin/bash /mnt/c/Users/Shind/OneDrive/Desktop/PS-005-GT/storage-engine/run_benchmark.sh
+$p = $PSScriptRoot -replace '\\', '/'
+$wslRoot = (wsl wslpath -u $p).Trim()
+wsl -d Ubuntu -e /bin/bash -c "cd '$wslRoot/storage-engine' && ./run_benchmark.sh"
 
 # -------------------------------------------------------------
 # STEP 3: DASHBOARD INSTRUCTIONS

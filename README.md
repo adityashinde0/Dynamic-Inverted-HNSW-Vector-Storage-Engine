@@ -252,6 +252,7 @@ PS-005-GT/
 │   └── storage.proto             # Shared gRPC protobuf contract
 ├── storage-engine/               # Rust LSM Vector Storage Engine
 │   ├── Cargo.toml                # Dependencies (rayon, tokio, axum, tonic, byteorder, crc32fast)
+│   ├── run_benchmark.sh          # Benchmark execution runner
 │   └── src/
 │       ├── types.rs              # VectorItem, Neighbor, SIMD dot product
 │       ├── wal.rs                # CRC32 validated binary Write-Ahead Log
@@ -268,12 +269,21 @@ PS-005-GT/
 │   └── go.mod
 ├── dashboard/                    # Vector Storage Control Room Frontend
 │   ├── index.html                # Dark technical control room UI
-│   ├── styles.css                # Obsidian Vector design system
-│   └── app.js                    # Live WebSocket telemetry & interactive search playground
+│   ├── dist/
+│   │   └── main.css              # Compiled production design stylesheet
+│   ├── js/                       # Modular frontend architecture
+│   │   ├── main.js               # UI controller & WebSocket telemetry sync
+│   │   ├── hnsw-scene.js         # Three.js 3D multi-layer HNSW graph
+│   │   ├── pipeline-diagram.js   # SVG dynamic architecture topology
+│   │   ├── benchmark-chart.js    # Interactive Chart.js telemetry metrics
+│   │   └── gsap-animations.js    # Smooth GSAP entry transitions
+│   ├── styles/                   # Obsidian Blueprint SCSS design tokens
+│   └── vendor/                   # Local offline JS libraries (Three.js, GSAP)
 ├── dataset/
 │   ├── vectors_1k_64d.bin        # 1,000 unit-normalized float32 vectors (64-dim)
 │   ├── queries_ground_truth_knn.json # 50 precomputed exact Top-10 queries
 │   └── DATASET_INFO.md
+├── start_demo.ps1                # One-click live demo launcher
 ├── run_tests.ps1                 # Automated end-to-end verification script
 ├── ARCHITECTURE.md               # Detailed architectural specification & invariants
 ├── PRD.md                        # Product requirements & evaluation criteria
